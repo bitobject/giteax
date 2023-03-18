@@ -24,7 +24,9 @@ defmodule Giteax.MixProject do
       {:ecto, "~> 3.8"},
       {:tesla, "~> 1.5"},
       {:hackney, "~> 1.17"},
-      {:jason, "~> 1.0"}
+      {:jason, "~> 1.0"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.2", only: [:dev], runtime: false}
     ]
   end
 end

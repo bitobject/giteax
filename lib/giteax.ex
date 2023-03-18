@@ -12,6 +12,7 @@ defmodule Giteax do
       :world
 
   """
+  @spec hello(list(), map()) :: {:ok, any} | {:error, any}
   def hello(middlewares, params) do
     # auth = Keyword.fetch!(params, :auth)
 
