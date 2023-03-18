@@ -26,3 +26,5 @@ giteax-*.tar
 /tmp/
 
 /deps/
+
+.elixir_ls
