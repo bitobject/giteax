@@ -33,7 +33,6 @@ defimpl Giteax.Auth, for: Giteax.Structs.AuthorizationHeaderToken do
   end
 end
 
-
 defimpl Giteax.Auth, for: Giteax.Structs.BasicAuth do
   @moduledoc """
   Basic Authorization

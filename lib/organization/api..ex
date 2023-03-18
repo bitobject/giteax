@@ -22,9 +22,14 @@ defmodule Giteax.Organization.Api do
       iex> create_org_repo(%Tesla.Client{}, %RepoRequestParams{}, [org: "bad_org"])
       {:error, error}
   """
-  @spec create_org_repo(Tesla.Client.t(), RepoRequestParams.t(), Keyword.t()) :: Tesla.Env.result()
+  @spec create_org_repo(Tesla.Client.t(), RepoRequestParams.t(), Keyword.t()) ::
+          Tesla.Env.result()
   def create_org_repo(client, %RepoRequestParams{} = body, params) do
-    validated_params = Helper.validate_params(params, [:org])
-    Tesla.post(client, "/orgs/:org/repos", body, opts: [path_params: validated_params])
+    case Helper.validate_params(params, [:org]) do
+      {:ok, validated_params} ->
+        Tesla.post(client, "/orgs/:org/repos", body, opts: [path_params: validated_params])
+      {:error, error} ->
+        {:error, error}
+    end
   end
 end

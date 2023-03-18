@@ -4,12 +4,12 @@
 # documentation.
 
 name: Elixir CI
-
+#TODO remoe s_ from branches
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "s_main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "s_main" ]
 
 permissions:
   contents: read
