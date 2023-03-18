@@ -1,11 +1,11 @@
-defmodule Giteax.Helper do
+defmodule Giteax.PathParams do
   @moduledoc """
   Documentation for `Giteax`.
   """
 
-  @spec validate_params(Keyword.t(), list(atom())) ::
+  @spec validate(Keyword.t(), list(atom())) ::
           {:ok, Keyword.t()} | {:error, %{field: atom(), errors: list(String.t())}}
-  def validate_params(params, required) do
+  def validate(params, required) do
     fetched_params = Keyword.take(params, required)
 
     validate_fetched_params(required, fetched_params)

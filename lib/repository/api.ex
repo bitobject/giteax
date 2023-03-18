@@ -3,7 +3,8 @@ defmodule Giteax.Repository.Api do
   Repository API for Gitea
   """
 
-  alias Giteax.Helper
+  alias Giteax.PathParams
+  alias Giteax.Response
 
   @doc """
   Delete a repository.
@@ -24,9 +25,12 @@ defmodule Giteax.Repository.Api do
   """
   @spec delete_repo(Tesla.Client.t(), Keyword.t()) :: Tesla.Env.result()
   def delete_repo(client, params) do
-    case Helper.validate_params(params, [:owner, :repo]) do
+    case PathParams.validate(params, [:owner, :repo]) do
       {:ok, validated_params} ->
-        Tesla.delete(client, "/repos/:owner/:repo", opts: [path_params: validated_params])
+        client
+        |> Tesla.delete("/repos/:owner/:repo", opts: [path_params: validated_params])
+        |> Response.handle()
+
       {:error, error} ->
         {:error, error}
     end
