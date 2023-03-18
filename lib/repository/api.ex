@@ -9,9 +9,7 @@ defmodule Giteax.Repository.Api do
   @doc """
   Delete a repository.
 
-  Returns `Tesla.Env.result()`.
-
-  ## Required Options
+  ## Required Params
   * `:owner` - the owner's name. If owner is organazation - organization's name.
   * `:repo` - the name of the repository.
 
