@@ -51,17 +51,19 @@ defmodule Giteax.Organization.ApiTest do
 
   describe "Delete organization api test" do
     test "delete_org/3: success" do
-      assert {:ok, _body} = Giteax.Organization.Api.create_org(test_client(), %{username: "orgs"})
-      assert {:ok, _body} = Giteax.Organization.Api.delete_org(test_client(), org: "orgs")
+      assert {:ok, _body} =
+               Giteax.Organization.Api.create_org(test_client(), %{username: "new_org_1"})
+
+      assert {:ok, _body} = Giteax.Organization.Api.delete_org(test_client(), org: "new_org_1")
     end
 
-    test "delete_org/3: already insert error" do
+    test "delete_org/3: already deleted organization" do
       assert {:error,
               %{
-                "errors" => ["user redirect does not exist [name: orgs]"],
+                "errors" => ["user redirect does not exist [name: new_org]"],
                 "message" => _,
                 "url" => _
-              }} = Giteax.Organization.Api.delete_org(test_client(), org: "orgs")
+              }} = Giteax.Organization.Api.delete_org(test_client(), org: "new_org")
     end
 
     test "delete_org/3: invalid params" do
@@ -78,6 +80,131 @@ defmodule Giteax.Organization.ApiTest do
 
       for data <- @params_data_types do
         assert error == Giteax.Organization.Api.delete_org(data, org: "org"),
+               "data: #{inspect(data)}"
+      end
+    end
+  end
+
+  describe "Create organization's repository api test" do
+    setup _ do
+      {:ok, _body} = Giteax.Organization.Api.create_org(test_client(), %{username: "org_1"})
+
+      on_exit(fn ->
+        Giteax.Organization.Api.delete_org(test_client(), org: "org_1")
+      end)
+
+      %{org: "org_1"}
+    end
+
+    test "create_org_repo/3: success", %{org: org} do
+      assert {:ok, _body} =
+               Giteax.Organization.Api.create_org_repo(test_client(), %{name: "repo_2"}, org: org)
+
+      on_exit(fn ->
+        Giteax.Repository.Api.delete_repo(test_client(), repo: "repo_2", owner: org)
+      end)
+    end
+
+    test "create_org_repo/3: already insert error", %{org: org} do
+      assert {:ok, _body} =
+               Giteax.Organization.Api.create_org_repo(test_client(), %{name: "repo_3"}, org: org)
+
+      assert {:error,
+              %{
+                "message" => "The repository with the same name already exists.",
+                "url" => _
+              }} =
+               Giteax.Organization.Api.create_org_repo(test_client(), %{name: "repo_3"}, org: org)
+
+      on_exit(fn ->
+        Giteax.Repository.Api.delete_repo(test_client(), repo: "repo_3", owner: org)
+      end)
+    end
+
+    test "create_org_repo/3: invalid body", %{org: org} do
+      error = {:error, %{field: :body, errors: ["expected to be a non empty map"]}}
+
+      for data <- @body_data_types do
+        assert error == Giteax.Organization.Api.create_org_repo(test_client(), data, org: org),
+               "data: #{inspect(data)}"
+      end
+    end
+
+    test "create_org_repo/3: invalid client", %{org: org} do
+      error = {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
+      for data <- @body_data_types do
+        assert error ==
+                 Giteax.Organization.Api.create_org_repo(data, %{name: "org_repo_4"}, org: org),
+               "data: #{inspect(data)}"
+      end
+    end
+
+    test "create_org_repo/3: invalid params" do
+      error = {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+      for data <- @params_data_types do
+        assert error ==
+                 Giteax.Organization.Api.create_org_repo(
+                   test_client(),
+                   %{name: "org_repo_5"},
+                   data
+                 ),
+               "data: #{inspect(data)}"
+      end
+    end
+  end
+
+  describe "List organization's teams api test" do
+    setup _ do
+      {:ok, _body} = Giteax.Organization.Api.create_org(test_client(), %{username: "org_2"})
+
+      on_exit(fn ->
+        Giteax.Organization.Api.delete_org(test_client(), org: "org_2")
+      end)
+
+      %{org: "org_2"}
+    end
+
+    test "list_org_team/3: success", %{org: org} do
+      assert {:ok, _body} =
+               Giteax.Organization.Api.list_org_team(test_client(), %{page_number: 1, limit: 5}, org: org)
+    end
+
+    test "list_org_team/3: already insert error", %{org: org} do
+      assert {:ok, _body} =
+               Giteax.Organization.Api.list_org_team(test_client(), %{page_number: 0, limit: 0}, org: org)
+    end
+
+    test "list_org_team/3: invalid body", %{org: org} do
+      error = {:error, %{field: :body, errors: ["expected to be a map"]}}
+
+      for data <- List.delete_at(@body_data_types, -1) do
+        assert error == Giteax.Organization.Api.list_org_team(test_client(), data, org: org),
+               "data: #{inspect(data)}"
+      end
+    end
+
+    test "list_org_team/3: invalid client", %{org: org} do
+      error = {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
+      for data <- @body_data_types do
+        assert error ==
+                 Giteax.Organization.Api.list_org_team(data, %{name: "org_repo_4"}, org: org),
+               "data: #{inspect(data)}"
+      end
+    end
+
+    test "list_org_team/3: invalid params" do
+      error = {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+      for data <- @params_data_types do
+        assert error ==
+                 Giteax.Organization.Api.list_org_team(
+                   test_client(),
+                   %{name: "org_repo_5"},
+                   data
+                 ),
                "data: #{inspect(data)}"
       end
     end

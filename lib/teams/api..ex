@@ -27,7 +27,7 @@ defmodule Giteax.Teams.Api do
     case PathParams.validate(params, [:id, :username]) do
       {:ok, validated_params} ->
         client
-        |> Tesla.put("/teams/{id}/members/{username}", opts: [path_params: validated_params])
+        |> Tesla.put("/teams/:id/members/:username", opts: [path_params: validated_params])
         |> Response.handle()
 
       {:error, errors} ->

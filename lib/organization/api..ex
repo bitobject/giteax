@@ -109,7 +109,8 @@ defmodule Giteax.Organization.Api do
   """
   @spec create_org_repo(Tesla.Client.t(), %{required(:name) => String.t()}, org: String.t()) ::
           {:ok, any()} | {:error, any()}
-  def create_org_repo(client, body, params) do
+  def create_org_repo(%Tesla.Client{} = client, body, params)
+      when map_size(body) > 0 and is_list(params) do
     with {:ok, %RepoRequestParams{} = struct} <- RepoRequestParams.validate(body),
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
       client
@@ -118,6 +119,15 @@ defmodule Giteax.Organization.Api do
     end
   end
 
+  def create_org_repo(%Tesla.Client{}, body, _params) when map_size(body) > 0,
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def create_org_repo(%Tesla.Client{}, _body, _params),
+    do: {:error, %{field: :body, errors: ["expected to be a non empty map"]}}
+
+  def create_org_repo(_client, _body, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
   @doc """
   List all organization teams.
 
@@ -125,9 +135,8 @@ defmodule Giteax.Organization.Api do
   * `:org` - the organization's name.
 
   ## Body
-  * `:page_number` - page number of results to return.
-  * `:limit` - page size of results.
-
+  * `:page_number` - page number of results to return, default: 1
+  * `:limit` - page size of results, default: 50
 
   ## Examples
 
@@ -142,7 +151,8 @@ defmodule Giteax.Organization.Api do
           %{required(:page_number) => number(), required(:limit) => number()},
           org: String.t()
         ) :: {:ok, any()} | {:error, any()}
-  def list_org_team(client, body, params) do
+  def list_org_team(%Tesla.Client{} = client, body, params)
+      when is_map(body) and is_list(params) do
     with {:ok, %TeamListRequestParams{} = struct} <- TeamListRequestParams.validate(body),
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
       filters =
@@ -155,4 +165,13 @@ defmodule Giteax.Organization.Api do
       |> Response.handle()
     end
   end
+
+  def list_org_team(%Tesla.Client{}, body, _params) when is_map(body),
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def list_org_team(%Tesla.Client{}, _body, _params),
+    do: {:error, %{field: :body, errors: ["expected to be a map"]}}
+
+  def list_org_team(_client, _body, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 end
