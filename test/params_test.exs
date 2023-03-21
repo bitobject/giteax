@@ -13,6 +13,12 @@ defmodule Giteax.PathParamsTest do
 
       assert {:error, %{field: :org, errors: ["expected to be in params"]}} =
                PathParams.validate([some: "some"], [:org, :some])
+
+      assert {:error, %{field: :params, errors: ["expected to be a keyword list"]}} =
+               PathParams.validate([:org, :some], [:org, :some])
+
+      assert {:error, %{field: :params, errors: ["expected to be a keyword list"]}} =
+               PathParams.validate([], [:org, :some])
     end
   end
 end

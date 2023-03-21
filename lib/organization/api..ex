@@ -43,11 +43,8 @@ defmodule Giteax.Organization.Api do
     end
   end
 
-  def create_org(%Tesla.Client{}, %{} = _body),
-    do: {:error, %{field: :body, errors: ["expected to be a not empty map"]}}
-
   def create_org(%Tesla.Client{}, _body),
-    do: {:error, %{field: :body, errors: ["expected to be a map"]}}
+    do: {:error, %{field: :body, errors: ["expected to be a non empty map"]}}
 
   def create_org(_client, _body),
     do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
@@ -55,25 +52,31 @@ defmodule Giteax.Organization.Api do
   @doc """
   Delete an organization.
 
-  ## Required Body
+  ## Required Params
     * `:org` - Username of the organization to create.
 
   ## Examples
 
       iex> delete_org(%Tesla.Client{}, org: "org")
-      {:ok, org: body}
+      {:ok, body}
 
       iex> delete_org(%Tesla.Client{}, org: "deleted_org")
       {:error, errors}
   """
   @spec delete_org(Tesla.Client.t(), org: String.t()) :: {:ok, any()} | {:error, any()}
-  def delete_org(client, params) do
+  def delete_org(%Tesla.Client{} = client, params) when is_list(params) do
     with {:ok, validated_params} <- PathParams.validate(params, [:org]) do
       client
       |> Tesla.delete("/orgs/:org", opts: [path_params: validated_params])
       |> Response.handle()
     end
   end
+
+  def delete_org(%Tesla.Client{}, _params),
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def delete_org(_client, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 
   @doc """
   Create an organization.
