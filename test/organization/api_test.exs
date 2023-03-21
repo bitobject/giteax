@@ -135,7 +135,7 @@ defmodule Giteax.Organization.ApiTest do
 
       for data <- @body_data_types do
         assert error ==
-                 Giteax.Organization.Api.create_org_repo(data, %{name: "org_repo_4"}, org: org),
+                 Giteax.Organization.Api.create_org_repo(data, %{name: "repo_4"}, org: org),
                "data: #{inspect(data)}"
       end
     end
@@ -147,7 +147,7 @@ defmodule Giteax.Organization.ApiTest do
         assert error ==
                  Giteax.Organization.Api.create_org_repo(
                    test_client(),
-                   %{name: "org_repo_5"},
+                   %{name: "repo_5"},
                    data
                  ),
                "data: #{inspect(data)}"
@@ -194,7 +194,7 @@ defmodule Giteax.Organization.ApiTest do
 
       for data <- @body_data_types do
         assert error ==
-                 Giteax.Organization.Api.list_org_team(data, %{name: "org_repo_4"}, org: org),
+                 Giteax.Organization.Api.list_org_team(data, %{name: "repo_4"}, org: org),
                "data: #{inspect(data)}"
       end
     end
@@ -206,7 +206,7 @@ defmodule Giteax.Organization.ApiTest do
         assert error ==
                  Giteax.Organization.Api.list_org_team(
                    test_client(),
-                   %{name: "org_repo_5"},
+                   %{name: "repo_5"},
                    data
                  ),
                "data: #{inspect(data)}"
