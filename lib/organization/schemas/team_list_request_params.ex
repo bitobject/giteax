@@ -5,7 +5,6 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParams do
   use Ecto.Schema
 
   @fields ~w(page limit)a
-  @required_fields ~w()a
   @derive {Jason.Encoder, only: @fields}
   @primary_key false
 
@@ -37,9 +36,5 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParams do
   def from_struct(struct), do: Map.take(struct, @fields)
 
   @spec change(map()) :: Ecto.Changeset.t(t())
-  defp change(params) do
-    %__MODULE__{}
-    |> Ecto.Changeset.cast(params, @fields)
-    |> Ecto.Changeset.validate_required(@required_fields)
-  end
+  def change(params), do: Ecto.Changeset.cast(%__MODULE__{}, params, @fields)
 end

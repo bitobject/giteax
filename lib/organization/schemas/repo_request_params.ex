@@ -56,7 +56,7 @@ defmodule Giteax.Organization.Schemas.RepoRequestParams do
   def apply(changeset), do: Ecto.Changeset.apply_changes(changeset)
 
   @spec change(%{required(:name) => String.t()}) :: Ecto.Changeset.t(t())
-  defp change(params) do
+  def change(params) do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)
     |> Ecto.Changeset.validate_required(@required_fields)
