@@ -44,12 +44,14 @@ defmodule Giteax.Admin.Schemas.UserRequestParams do
     end
   end
 
-  @spec apply(Ecto.Changeset.t()) :: t()
-  def apply(changeset) do
-    Ecto.Changeset.apply_changes(changeset)
-  end
+  @spec apply(Ecto.Changeset.t(t())) :: t()
+  def apply(changeset), do: Ecto.Changeset.apply_changes(changeset)
 
-  @spec change(map()) :: Ecto.Changeset.t()
+  @spec change(%{
+          required(:email) => String.t(),
+          required(:password) => String.t(),
+          required(:username) => String.t()
+        }) :: Ecto.Changeset.t(t())
   defp change(params) do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)

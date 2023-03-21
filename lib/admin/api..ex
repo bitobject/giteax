@@ -30,7 +30,11 @@ defmodule Giteax.Admin.Api do
       iex> create_user_by_admin(%Tesla.Client{}, %{email: "invalid_email", password: "invalid_password", username: "invalid_username"})
       {:error, errors}
   """
-  @spec create_user_by_admin(Tesla.Client.t(), map()) :: {:ok, any()} | {:error, any()}
+  @spec create_user_by_admin(Tesla.Client.t(), %{
+          required(:email) => String.t(),
+          required(:password) => String.t(),
+          required(:username) => String.t()
+        }) :: {:ok, any()} | {:error, any()}
   def create_user_by_admin(client, body) do
     case UserRequestParams.validate(body) do
       {:ok, %UserRequestParams{} = struct} ->

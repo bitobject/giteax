@@ -52,12 +52,10 @@ defmodule Giteax.Organization.Schemas.RepoRequestParams do
     end
   end
 
-  @spec apply(Ecto.Changeset.t()) :: t()
-  def apply(changeset) do
-    Ecto.Changeset.apply_changes(changeset)
-  end
+  @spec apply(Ecto.Changeset.t(t())) :: t()
+  def apply(changeset), do: Ecto.Changeset.apply_changes(changeset)
 
-  @spec change(map()) :: Ecto.Changeset.t()
+  @spec change(%{required(:name) => String.t()}) :: Ecto.Changeset.t(t())
   defp change(params) do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)

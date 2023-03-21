@@ -40,13 +40,11 @@ defmodule Giteax.Organization.Schemas.OrgRequestParams do
     end
   end
 
-  @spec apply(Ecto.Changeset.t()) :: t()
-  def apply(changeset) do
-    Ecto.Changeset.apply_changes(changeset)
-  end
+  @spec apply(Ecto.Changeset.t(t())) :: t()
+  def apply(changeset), do: Ecto.Changeset.apply_changes(changeset)
 
-  @spec change(map()) :: Ecto.Changeset.t()
-  defp change(params) do
+  @spec change(%{required(:username) => String.t()}) :: Ecto.Changeset.t(t())
+  def change(params) do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)
     |> Ecto.Changeset.validate_required(@required_fields)

@@ -4,9 +4,12 @@ defmodule Giteax.Organization.Api do
   """
 
   alias Giteax.Organization.Schemas.RepoRequestParams
+  alias Giteax.Organization.Schemas.OrgRequestParams
   alias Giteax.Organization.Schemas.TeamListRequestParams
   alias Giteax.PathParams
   alias Giteax.Response
+
+  # TODO add guards to for incomming tesla client, body and params and make new tests
 
   @doc """
   Create an organization.
@@ -24,17 +27,50 @@ defmodule Giteax.Organization.Api do
 
   ## Examples
 
-      iex> create_org_repo(%Tesla.Client{}, body)
+      iex> create_org(%Tesla.Client{}, %{username: "username"})
       {:ok, body}
 
-      iex> create_org_repo(%Tesla.Client{}, body)
+      iex> create_org(%Tesla.Client{}, %{username: "already_inserted_username"})
       {:error, errors}
   """
-  @spec create_org_repo(Tesla.Client.t(), map()) :: {:ok, any()} | {:error, any()}
-  def create_org_repo(client, body) do
-    with {:ok, %RepoRequestParams{} = struct} <- RepoRequestParams.validate(body) do
+  @spec create_org(Tesla.Client.t(), %{required(:username) => String.t()}) ::
+          {:ok, any()} | {:error, any()}
+  def create_org(%Tesla.Client{} = client, body) when map_size(body) > 0 do
+    with {:ok, %OrgRequestParams{} = struct} <- OrgRequestParams.validate(body) do
       client
       |> Tesla.post("/orgs", struct)
+      |> Response.handle()
+    end
+  end
+
+  def create_org(%Tesla.Client{}, %{} = _body),
+    do: {:error, %{field: :body, errors: ["expected to be a not empty map"]}}
+
+  def create_org(%Tesla.Client{}, _body),
+    do: {:error, %{field: :body, errors: ["expected to be a map"]}}
+
+  def create_org(_client, _body),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
+  @doc """
+  Delete an organization.
+
+  ## Required Body
+    * `:org` - Username of the organization to create.
+
+  ## Examples
+
+      iex> delete_org(%Tesla.Client{}, org: "org")
+      {:ok, org: body}
+
+      iex> delete_org(%Tesla.Client{}, org: "deleted_org")
+      {:error, errors}
+  """
+  @spec delete_org(Tesla.Client.t(), org: String.t()) :: {:ok, any()} | {:error, any()}
+  def delete_org(client, params) do
+    with {:ok, validated_params} <- PathParams.validate(params, [:org]) do
+      client
+      |> Tesla.delete("/orgs/:org", opts: [path_params: validated_params])
       |> Response.handle()
     end
   end
@@ -68,7 +104,8 @@ defmodule Giteax.Organization.Api do
       iex> create_org_repo(%Tesla.Client{}, body, [org: "bad_org"])
       {:error, errors}
   """
-  @spec create_org_repo(Tesla.Client.t(), map(), Keyword.t()) :: {:ok, any()} | {:error, any()}
+  @spec create_org_repo(Tesla.Client.t(), %{required(:name) => String.t()}, org: String.t()) ::
+          {:ok, any()} | {:error, any()}
   def create_org_repo(client, body, params) do
     with {:ok, %RepoRequestParams{} = struct} <- RepoRequestParams.validate(body),
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
@@ -97,11 +134,18 @@ defmodule Giteax.Organization.Api do
       iex> list_org_team(%Tesla.Client{}, %{page_number: 1, limit: 1}, [org: "bad_org"])
       {:error, errors}
   """
-  @spec list_org_team(Tesla.Client.t(), map(), Keyword.t()) :: {:ok, any()} | {:error, any()}
+  @spec list_org_team(
+          Tesla.Client.t(),
+          %{required(:page_number) => number(), required(:limit) => number()},
+          org: String.t()
+        ) :: {:ok, any()} | {:error, any()}
   def list_org_team(client, body, params) do
     with {:ok, %TeamListRequestParams{} = struct} <- TeamListRequestParams.validate(body),
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
-      filters = URI.encode_query(struct)
+      filters =
+        struct
+        |> TeamListRequestParams.from_struct()
+        |> URI.encode_query()
 
       client
       |> Tesla.get("/orgs/:org/teams" <> "?" <> filters, opts: [path_params: validated_params])

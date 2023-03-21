@@ -30,12 +30,13 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParams do
     end
   end
 
-  @spec apply(Ecto.Changeset.t()) :: t()
-  def apply(changeset) do
-    Ecto.Changeset.apply_changes(changeset)
-  end
+  @spec apply(Ecto.Changeset.t(t())) :: t()
+  def apply(changeset), do: Ecto.Changeset.apply_changes(changeset)
 
-  @spec change(map()) :: Ecto.Changeset.t()
+  @spec from_struct(t()) :: %{page: integer(), limit: integer()}
+  def from_struct(struct), do: Map.take(struct, @fields)
+
+  @spec change(map()) :: Ecto.Changeset.t(t())
   defp change(params) do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)

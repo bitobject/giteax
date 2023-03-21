@@ -21,7 +21,7 @@ defmodule Giteax.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.8"},
+      {:ecto, "~> 3.0"},
       {:tesla, "~> 1.5"},
       {:hackney, "~> 1.17"},
       {:jason, "~> 1.0"},

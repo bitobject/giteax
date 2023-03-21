@@ -3,8 +3,6 @@ defmodule Giteax.Teams.Api do
   Teams API for Gitea
   """
 
-  alias Giteax.Teams.Schemas.OrgRequestParams
-  alias Giteax.Teams.Schemas.TeamListRequestParams
   alias Giteax.PathParams
   alias Giteax.Response
 
@@ -23,7 +21,8 @@ defmodule Giteax.Teams.Api do
       iex> add_team_member(%Tesla.Client{}, [id: 2, username: "bad_username"])
       {:error, errors}
   """
-  @spec add_team_member(Tesla.Client.t(), Keyword.t()) :: {:ok, any()} | {:error, any()}
+  @spec add_team_member(Tesla.Client.t(), id: number(), username: String.t()) ::
+          {:ok, any()} | {:error, any()}
   def add_team_member(client, params) do
     case PathParams.validate(params, [:id, :username]) do
       {:ok, validated_params} ->

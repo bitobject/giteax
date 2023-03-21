@@ -21,7 +21,7 @@ defmodule Giteax.Repository.Api do
       iex> delete_repo(%Tesla.Client{}, [repo: "repo", owner: "owner"])
       {:error, error}
   """
-  @spec delete_repo(Tesla.Client.t(), Keyword.t()) :: Tesla.Env.result()
+  @spec delete_repo(Tesla.Client.t(), owner: String.t(), repo: String.t()) :: Tesla.Env.result()
   def delete_repo(client, params) do
     case PathParams.validate(params, [:owner, :repo]) do
       {:ok, validated_params} ->
