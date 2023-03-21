@@ -168,12 +168,16 @@ defmodule Giteax.Organization.ApiTest do
 
     test "list_org_team/3: success", %{org: org} do
       assert {:ok, _body} =
-               Giteax.Organization.Api.list_org_team(test_client(), %{page_number: 1, limit: 5}, org: org)
+               Giteax.Organization.Api.list_org_team(test_client(), %{page_number: 1, limit: 5},
+                 org: org
+               )
     end
 
     test "list_org_team/3: already insert error", %{org: org} do
       assert {:ok, _body} =
-               Giteax.Organization.Api.list_org_team(test_client(), %{page_number: 0, limit: 0}, org: org)
+               Giteax.Organization.Api.list_org_team(test_client(), %{page_number: 0, limit: 0},
+                 org: org
+               )
     end
 
     test "list_org_team/3: invalid body", %{org: org} do

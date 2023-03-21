@@ -22,7 +22,7 @@ defmodule Giteax.Repository.Api do
       {:error, error}
   """
   @spec delete_repo(Tesla.Client.t(), owner: String.t(), repo: String.t()) :: Tesla.Env.result()
-  def delete_repo(client, params) do
+  def delete_repo(%Tesla.Client{} = client, params) when is_list(params) do
     case PathParams.validate(params, [:owner, :repo]) do
       {:ok, validated_params} ->
         client
@@ -33,4 +33,10 @@ defmodule Giteax.Repository.Api do
         {:error, error}
     end
   end
+
+  def delete_repo(%Tesla.Client{}, _params),
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def delete_repo(_client, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 end
