@@ -23,14 +23,10 @@ defmodule Giteax.Repository.Api do
   """
   @spec delete_repo(Tesla.Client.t(), owner: String.t(), repo: String.t()) :: Tesla.Env.result()
   def delete_repo(%Tesla.Client{} = client, params) when is_list(params) do
-    case PathParams.validate(params, [:owner, :repo]) do
-      {:ok, validated_params} ->
-        client
-        |> Tesla.delete("/repos/:owner/:repo", opts: [path_params: validated_params])
-        |> Response.handle()
-
-      {:error, error} ->
-        {:error, error}
+    with {:ok, validated_params} <- PathParams.validate(params, [:owner, :repo]) do
+      client
+      |> Tesla.delete("/repos/:owner/:repo", opts: [path_params: validated_params])
+      |> Response.handle()
     end
   end
 

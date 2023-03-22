@@ -9,8 +9,6 @@ defmodule Giteax.Organization.Api do
   alias Giteax.PathParams
   alias Giteax.Response
 
-  # TODO add guards to for incomming tesla client, body and params and make new tests
-
   @doc """
   Create an organization.
 
