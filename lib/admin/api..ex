@@ -4,6 +4,7 @@ defmodule Giteax.Admin.Api do
   """
 
   alias Giteax.Admin.Schemas.UserRequestParams
+  alias Giteax.PathParams
   alias Giteax.Response
 
   @doc """
@@ -13,6 +14,11 @@ defmodule Giteax.Admin.Api do
   * `:email`
   * `:password`
   * `:username`
+
+  Email validated by regex
+  ```
+  ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i
+  ```
 
   ## Body
   * `:full_name`
@@ -35,15 +41,47 @@ defmodule Giteax.Admin.Api do
           required(:password) => String.t(),
           required(:username) => String.t()
         }) :: {:ok, any()} | {:error, any()}
-  def create_user_by_admin(client, body) do
-    case UserRequestParams.validate(body) do
-      {:ok, %UserRequestParams{} = struct} ->
-        client
-        |> Tesla.post("/admin/users", struct)
-        |> Response.handle()
-
-      {:error, errors} ->
-        {:error, errors}
+  def create_user_by_admin(%Tesla.Client{} = client, body) when map_size(body) > 2 do
+    with {:ok, %UserRequestParams{} = struct} <- UserRequestParams.validate(body) do
+      client
+      |> Tesla.post("/admin/users", struct)
+      |> Response.handle()
     end
   end
+
+  def create_user_by_admin(%Tesla.Client{}, _body),
+    do: {:error, %{field: :params, errors: ["expected to be a non empty map"]}}
+
+  def create_user_by_admin(_client, _body),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
+  @doc """
+  Delete a user.
+
+  ## Required Params
+  * `:username`
+
+  ## Examples
+
+      iex> delete_user_by_admin(%Tesla.Client{}, [username: "username"])
+      {:ok, %Tesla.Env{}}
+
+      iex> delete_user_by_admin(%Tesla.Client{}, [username: "invalid_username"])
+      {:error, errors}
+  """
+  @spec delete_user_by_admin(Tesla.Client.t(), username: String.t()) ::
+          {:ok, any()} | {:error, any()}
+  def delete_user_by_admin(%Tesla.Client{} = client, params) when is_list(params) do
+    with {:ok, validated_params} <- PathParams.validate(params, [:username]) do
+      client
+      |> Tesla.delete("/admin/users/:username", opts: [path_params: validated_params])
+      |> Response.handle()
+    end
+  end
+
+  def delete_user_by_admin(%Tesla.Client{}, _params),
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def delete_user_by_admin(_client, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 end

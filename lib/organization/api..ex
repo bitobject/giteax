@@ -101,10 +101,10 @@ defmodule Giteax.Organization.Api do
 
   ## Examples
 
-      iex> create_org_repo(%Tesla.Client{}, body, [org: "org"])
+      iex> create_org_repo(%Tesla.Client{}, %{name: "name"}, [org: "org"])
       {:ok, body}
 
-      iex> create_org_repo(%Tesla.Client{}, body, [org: "bad_org"])
+      iex> create_org_repo(%Tesla.Client{}, %{name: "bad_name"}, [org: "bad_org"])
       {:error, errors}
   """
   @spec create_org_repo(Tesla.Client.t(), %{required(:name) => String.t()}, org: String.t()) ::

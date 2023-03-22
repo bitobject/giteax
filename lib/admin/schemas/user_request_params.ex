@@ -8,6 +8,7 @@ defmodule Giteax.Admin.Schemas.UserRequestParams do
   @required_fields ~w(email password username)a
   @derive {Jason.Encoder, only: @fields}
   @primary_key false
+  @email_regex ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i
 
   @type t() :: %__MODULE__{
           email: String.t(),
@@ -52,9 +53,10 @@ defmodule Giteax.Admin.Schemas.UserRequestParams do
           required(:password) => String.t(),
           required(:username) => String.t()
         }) :: Ecto.Changeset.t(t())
-  defp change(params) do
+  def change(params) do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)
+    |> Ecto.Changeset.validate_format(:email, @email_regex)
     |> Ecto.Changeset.validate_required(@required_fields)
   end
 end
