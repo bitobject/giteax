@@ -134,8 +134,8 @@ defmodule Giteax.Organization.Api do
   * `:org` - the organization's name.
 
   ## Body
-  * `:page_number` - page number of results to return, default: 1
-  * `:limit` - page size of results, default: 50
+  * `:page_number` - page number of results to return, default: `1`
+  * `:limit` - page size of results, default: `50`
 
   ## Examples
 
@@ -154,11 +154,10 @@ defmodule Giteax.Organization.Api do
       when is_map(body) and is_list(params) do
     with {:ok, %TeamListRequestParams{} = struct} <- TeamListRequestParams.validate(body),
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
+      query = TeamListRequestParams.to_list(struct)
+
       client
-      |> Tesla.get("/orgs/:org/teams",
-        query: TeamListRequestParams.to_list(struct),
-        opts: [path_params: validated_params]
-      )
+      |> Tesla.get("/orgs/:org/teams", query: query, opts: [path_params: validated_params])
       |> Response.handle()
     end
   end

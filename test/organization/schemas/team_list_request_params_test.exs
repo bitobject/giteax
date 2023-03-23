@@ -15,6 +15,12 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParamsTest do
 
       assert {:ok, struct(TeamListRequestParams, all_params)} ==
                TeamListRequestParams.validate(all_params)
+
+      assert {:ok, %TeamListRequestParams{limit: 10, page: 10}} =
+               TeamListRequestParams.validate(%{limit: "10", page: "10"})
+
+      assert {:error, [page: {"is invalid", _}, limit: {"is invalid", _}]} =
+               TeamListRequestParams.validate(%{limit: "invalid", page: "invalid"})
     end
 
     test "change/1" do
@@ -25,6 +31,11 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParamsTest do
 
       assert %Ecto.Changeset{valid?: true, errors: [], changes: ^all_params} =
                TeamListRequestParams.change(params_with_unknown_fields)
+
+      assert %Ecto.Changeset{
+               valid?: false,
+               errors: [page: {"is invalid", _}, limit: {"is invalid", _}]
+             } = TeamListRequestParams.change(%{limit: "invalid", page: "invalid"})
     end
 
     test "apply/1" do
