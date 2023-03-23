@@ -6,13 +6,13 @@ defmodule Giteax.Repository.ApiTest do
 
   describe "Delete repository api test" do
     setup _ do
-      {:ok, _body} = Giteax.Organization.Api.create_org(test_client(), %{username: "org_3"})
+      {:ok, _body} = Giteax.Organization.Api.create_org(test_client(), %{username: "org_6"})
 
       on_exit(fn ->
-        Giteax.Organization.Api.delete_org(test_client(), org: "org_3")
+        Giteax.Organization.Api.delete_org(test_client(), org: "org_6")
       end)
 
-      %{org: "org_3"}
+      %{org: "org_6"}
     end
 
     test "delete_repo/3: success", %{org: org} do

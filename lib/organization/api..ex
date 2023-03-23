@@ -5,6 +5,7 @@ defmodule Giteax.Organization.Api do
 
   alias Giteax.Organization.Schemas.RepoRequestParams
   alias Giteax.Organization.Schemas.OrgRequestParams
+  alias Giteax.Organization.Schemas.TeamRequestParams
   alias Giteax.Organization.Schemas.TeamListRequestParams
   alias Giteax.PathParams
   alias Giteax.Response
@@ -171,5 +172,148 @@ defmodule Giteax.Organization.Api do
     do: {:error, %{field: :body, errors: ["expected to be a map"]}}
 
   def list_org_team(_client, _body, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
+  @doc """
+  Create a team member.
+
+  ## Required Params
+  * `:id` - the team id.
+  * `:username` - the team member's name.
+
+  ## Examples
+
+      iex> add_team_member(%Tesla.Client{}, [id: 1, username: "username"])
+      {:ok, body}
+
+      iex> add_team_member(%Tesla.Client{}, [id: 2, username: "bad_username"])
+      {:error, errors}
+  """
+  @spec add_team_member(Tesla.Client.t(), id: number(), username: String.t()) ::
+          {:ok, any()} | {:error, any()}
+  def add_team_member(%Tesla.Client{} = client, params) when is_list(params) do
+    with {:ok, validated_params} <- PathParams.validate(params, [:id, :username]) do
+      client
+      |> Tesla.put("/teams/:id/members/:username", nil, opts: [path_params: validated_params])
+      |> Response.handle()
+    end
+  end
+
+  def add_team_member(%Tesla.Client{}, _params),
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def add_team_member(_client, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
+  @doc """
+  Delete a team member.
+
+  ## Required Params
+  * `:id` - the team id.
+  * `:username` - the team member's name.
+
+  ## Examples
+
+      iex> delete_team_member(%Tesla.Client{}, [id: 1, username: "username"])
+      {:ok, body}
+
+      iex> delete_team_member(%Tesla.Client{}, [id: 2, username: "bad_username"])
+      {:error, errors}
+  """
+  @spec delete_team_member(Tesla.Client.t(), id: number(), username: String.t()) ::
+          {:ok, any()} | {:error, any()}
+  def delete_team_member(%Tesla.Client{} = client, params) when is_list(params) do
+    with {:ok, validated_params} <- PathParams.validate(params, [:id, :username]) do
+      client
+      |> Tesla.delete("/teams/:id/members/:username", opts: [path_params: validated_params])
+      |> Response.handle()
+    end
+  end
+
+  def delete_team_member(%Tesla.Client{}, _params),
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def delete_team_member(_client, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
+  @doc """
+  Create an team.
+
+  ## Required Params
+  * `:org` - the organization's name.
+
+  ## Required Body
+    * `:name` - Username of the team to create.
+
+  ## Body
+  * `:can_create_org_repo` - Ability to create organization repo.
+  * `:description` - Description of the team to create.
+  * `:includes_all_repositories` - Ability to have all repos.
+  * `:permission` - Permissions.
+  * `:units` - Units.
+
+  ### Body Details
+  * permission: can be one of
+    `~w(read write admin)a`
+  * units: list of
+    `~w(repo.code repo.issues repo.ext_issues repo.wiki repo.pulls repo.releases repo.projects repo.ext_wiki)a`
+
+  ## Examples
+
+      iex> create_team(%Tesla.Client{}, %{name: "name"}, [org: "org"])
+      {:ok, body}
+
+      iex> create_team(%Tesla.Client{}, %{name: "already_inserted_name"}, [org: "bad_org"])
+      {:error, errors}
+  """
+  @spec create_team(Tesla.Client.t(), %{required(:name) => String.t()}, org: String.t()) ::
+          {:ok, any()} | {:error, any()}
+  def create_team(%Tesla.Client{} = client, body, params)
+      when map_size(body) > 0 and is_list(params) do
+    with {:ok, validated_params} <- PathParams.validate(params, [:org]),
+         {:ok, %TeamRequestParams{} = struct} <- TeamRequestParams.validate(body) do
+      client
+      |> Tesla.post("/orgs/:org/teams", struct, opts: [path_params: validated_params])
+      |> Response.handle()
+    end
+  end
+
+  def create_team(%Tesla.Client{}, body, _params) when map_size(body) > 0,
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def create_team(%Tesla.Client{}, _body, _params),
+    do: {:error, %{field: :body, errors: ["expected to be a non empty map"]}}
+
+  def create_team(_client, _body, _params),
+    do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
+
+  @doc """
+  Delete a team.
+
+  ## Required Params
+  * `:id` - the team id.
+
+  ## Examples
+
+      iex> delete_team(%Tesla.Client{}, [id: 1])
+      {:ok, body}
+
+      iex> delete_team(%Tesla.Client{}, [id: -1])
+      {:error, errors}
+  """
+  @spec delete_team(Tesla.Client.t(), id: number()) ::
+          {:ok, any()} | {:error, any()}
+  def delete_team(%Tesla.Client{} = client, params) when is_list(params) do
+    with {:ok, validated_params} <- PathParams.validate(params, [:id]) do
+      client
+      |> Tesla.delete("/teams/:id", opts: [path_params: validated_params])
+      |> Response.handle()
+    end
+  end
+
+  def delete_team(%Tesla.Client{}, _params),
+    do: {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
+
+  def delete_team(_client, _params),
     do: {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 end

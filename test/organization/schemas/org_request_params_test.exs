@@ -37,6 +37,15 @@ defmodule Giteax.Organization.Schemas.OrgRequestParamsTest do
       assert %Ecto.Changeset{valid?: true, errors: [], changes: %{username: "some"}} =
                OrgRequestParams.change(%{username: "some"})
 
+      assert %Ecto.Changeset{valid?: true, errors: [], changes: %{username: "some"}} =
+               OrgRequestParams.change(%{username: "some", visibility: "private"})
+
+      assert %Ecto.Changeset{
+               valid?: false,
+               errors: [visibility: {"is invalid", _}],
+               changes: %{username: "some"}
+             } = OrgRequestParams.change(%{username: "some", visibility: :some})
+
       assert %Ecto.Changeset{valid?: true, errors: [], changes: ^all_params} =
                OrgRequestParams.change(params_with_unknown_fields)
     end

@@ -37,6 +37,15 @@ defmodule Giteax.Organization.Schemas.RepoRequestParamsTest do
       assert %Ecto.Changeset{valid?: true, errors: [], changes: %{name: "some"}} =
                RepoRequestParams.change(%{name: "some"})
 
+      assert %Ecto.Changeset{valid?: true, errors: [], changes: %{name: "some"}} =
+               RepoRequestParams.change(%{name: "some", trust_model: "committer"})
+
+      assert %Ecto.Changeset{
+               valid?: false,
+               errors: [trust_model: {"is invalid", _}],
+               changes: %{name: "some"}
+             } = RepoRequestParams.change(%{name: "some", trust_model: :some})
+
       assert %Ecto.Changeset{valid?: true, errors: [], changes: ^all_params} =
                RepoRequestParams.change(params_with_unknown_fields)
     end

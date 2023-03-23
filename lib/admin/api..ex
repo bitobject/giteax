@@ -15,10 +15,11 @@ defmodule Giteax.Admin.Api do
   * `:password`
   * `:username`
 
-  Email validated by regex
-  ```
-  ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i
-  ```
+  ### Body Details
+  * email: validated by regex
+    ```
+    ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i
+    ```
 
   ## Body
   * `:full_name`
