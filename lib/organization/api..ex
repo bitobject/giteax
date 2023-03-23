@@ -154,13 +154,11 @@ defmodule Giteax.Organization.Api do
       when is_map(body) and is_list(params) do
     with {:ok, %TeamListRequestParams{} = struct} <- TeamListRequestParams.validate(body),
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
-      filters =
-        struct
-        |> TeamListRequestParams.from_struct()
-        |> URI.encode_query()
-
       client
-      |> Tesla.get("/orgs/:org/teams" <> "?" <> filters, opts: [path_params: validated_params])
+      |> Tesla.get("/orgs/:org/teams",
+        query: TeamListRequestParams.to_list(struct),
+        opts: [path_params: validated_params]
+      )
       |> Response.handle()
     end
   end

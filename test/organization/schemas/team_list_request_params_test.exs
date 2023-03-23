@@ -36,14 +36,14 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParamsTest do
       assert %TeamListRequestParams{} == TeamListRequestParams.apply(empty_changeset)
     end
 
-    test "from_struct/1" do
+    test "to_list/1" do
       base = %TeamListRequestParams{}
       all_params = all_params()
       all_params_struct = struct(TeamListRequestParams, all_params)
 
-      assert %{page: 1, limit: 50} == TeamListRequestParams.from_struct(base)
-      assert all_params == TeamListRequestParams.from_struct(all_params)
-      assert all_params == TeamListRequestParams.from_struct(all_params_struct)
+      assert [limit: 50, page: 1] == TeamListRequestParams.to_list(base)
+      assert [limit: 0, page: 0] == TeamListRequestParams.to_list(all_params)
+      assert [limit: 0, page: 0] == TeamListRequestParams.to_list(all_params_struct)
     end
   end
 
