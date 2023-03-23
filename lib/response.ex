@@ -4,16 +4,10 @@ defmodule Giteax.Response do
   """
 
   @spec handle(Tesla.Env.result()) :: {:ok, any()} | {:error, any()}
-  def handle(resp) do
-    case resp do
-      {:ok, %Tesla.Env{status: status, body: resp_body}} when status in 200..299 ->
-        {:ok, resp_body}
+  def handle({:ok, %Tesla.Env{status: status, body: resp_body}}) when status in 200..299,
+    do: {:ok, resp_body}
 
-      {:ok, %Tesla.Env{body: resp_body}} ->
-        {:error, resp_body}
-
-      {:error, error} ->
-        {:error, error}
-    end
-  end
+  def handle({:ok, %Tesla.Env{body: resp_body}}), do: {:error, resp_body}
+  def handle({:error, error}), do: {:error, error}
+  def handle(error), do: {:error, error}
 end

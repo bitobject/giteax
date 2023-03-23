@@ -8,10 +8,7 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParams do
   @derive {Jason.Encoder, only: @fields}
   @primary_key false
 
-  @type t() :: %__MODULE__{
-          page: boolean(),
-          limit: String.t()
-        }
+  @type t() :: %__MODULE__{page: boolean(), limit: String.t()}
 
   schema "team_list_requests_params" do
     field(:page, :integer, default: 1)
@@ -32,8 +29,12 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParams do
   @spec apply(Ecto.Changeset.t(t())) :: t()
   def apply(changeset), do: Ecto.Changeset.apply_changes(changeset)
 
-  @spec to_list(t()) :: %{page: integer(), limit: integer()}
-  def to_list(struct), do: Map.take(struct, @fields) |> Map.to_list()
+  @spec to_list(t()) :: [page: integer(), limit: integer()]
+  def to_list(struct) do
+    struct
+    |> Map.take(@fields)
+    |> Map.to_list()
+  end
 
   @spec change(map()) :: Ecto.Changeset.t(t())
   def change(params), do: Ecto.Changeset.cast(%__MODULE__{}, params, @fields)
