@@ -28,7 +28,7 @@ defmodule Giteax.Organization.Api do
   * visibility: can be one of
     `~w(public limited private)a`
   * website: validated by regex
-    ~r/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
+    `~r/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/`
 
   ## Examples
 

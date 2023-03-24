@@ -17,9 +17,7 @@ defmodule Giteax.Admin.Api do
 
   ### Body Details
   * email: validated by regex
-    ```
-    ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i
-    ```
+    `~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i`
 
   ## Body
   * `:full_name`
