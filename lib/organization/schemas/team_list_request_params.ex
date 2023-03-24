@@ -15,7 +15,7 @@ defmodule Giteax.Organization.Schemas.TeamListRequestParams do
     field(:limit, :integer, default: 50)
   end
 
-  @spec validate(map()) :: {:ok, t()} | {:error, Keyword.t()}
+  @spec validate(map()) :: {:ok, t()} | {:error, [{atom(), Ecto.Changeset.error()}]}
   def validate(params) do
     case change(params) do
       %Ecto.Changeset{valid?: true} = changeset ->

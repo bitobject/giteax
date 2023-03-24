@@ -8,6 +8,7 @@ defmodule Giteax.Organization.Schemas.OrgRequestParams do
   @required_fields ~w(username)a
   @derive {Jason.Encoder, only: @fields}
   @primary_key false
+  @website_regex ~r/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
 
   @type t() :: %__MODULE__{
           description: String.t(),
@@ -25,11 +26,11 @@ defmodule Giteax.Organization.Schemas.OrgRequestParams do
     field(:location, :string)
     field(:repo_admin_change_team_access, :boolean, default: true)
     field(:username, :string)
-    field(:visibility, Ecto.Enum, values: [:public, :limited, :private], default: :public)
+    field(:visibility, Ecto.Enum, values: ~w(public limited private)a, default: :public)
     field(:website, :string)
   end
 
-  @spec validate(map()) :: {:ok, t()} | {:error, Keyword.t()}
+  @spec validate(map()) :: {:ok, t()} | {:error, [{atom(), Ecto.Changeset.error()}]}
   def validate(params) do
     case change(params) do
       %Ecto.Changeset{valid?: true} = changeset ->
@@ -48,5 +49,6 @@ defmodule Giteax.Organization.Schemas.OrgRequestParams do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)
     |> Ecto.Changeset.validate_required(@required_fields)
+    |> Ecto.Changeset.validate_format(:website, @website_regex)
   end
 end

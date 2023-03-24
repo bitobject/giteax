@@ -39,7 +39,7 @@ defmodule Giteax.Organization.Schemas.TeamRequestParams do
     field(:units, {:array, Ecto.Enum}, values: @unit_values)
   end
 
-  @spec validate(map()) :: {:ok, t()} | {:error, Keyword.t()}
+  @spec validate(map()) :: {:ok, t()} | {:error, [{atom(), Ecto.Changeset.error()}]}
   def validate(params) do
     case change(params) do
       %Ecto.Changeset{valid?: true} = changeset ->

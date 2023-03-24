@@ -34,7 +34,7 @@ defmodule Giteax.Admin.Schemas.UserRequestParams do
     field(:visibility, :string)
   end
 
-  @spec validate(map()) :: {:ok, t()} | {:error, Keyword.t()}
+  @spec validate(map()) :: {:ok, t()} | {:error, [{atom(), Ecto.Changeset.error()}]}
   def validate(params) do
     case change(params) do
       %Ecto.Changeset{valid?: true} = changeset ->

@@ -1,30 +1,35 @@
 defmodule Giteax.Organization.ApiTest do
   use ExUnit.Case, async: true
+
+  import Giteax.Support.OrganizationFactory
+
   alias Giteax.Organization.Api
+
   @api_path "/api/v1"
   @body_data_types [0, -1, 0.0, -1.0, "some", "", [some: :data], [{"some", "data"}], [], %{}]
   @params_data_types [0, -1, 0.0, -1.0, "some", "", %{some: :data}, %{"some" => "data"}, [], %{}]
 
   describe "Create organization api test" do
     test "create_org/2: success" do
-      assert {:ok, _body} = Api.create_org(test_client(), %{username: "username"})
+      org_params = build(:org_params)
+      assert {:ok, _body} = Api.create_org(test_client(), org_params)
 
       on_exit(fn ->
-        Api.delete_org(test_client(), org: "username")
+        Api.delete_org(test_client(), org: org_params.username)
       end)
     end
 
     test "create_org/2: already insert error" do
-      assert {:ok, _body} = Api.create_org(test_client(), %{username: "some_username"})
+      org_params = build(:org_params)
+      error = "user already exists [name: #{org_params.username}]"
 
-      assert {:error,
-              %{
-                "message" => "user already exists [name: some_username]",
-                "url" => _
-              }} = Api.create_org(test_client(), %{username: "some_username"})
+      assert {:ok, _body} = Api.create_org(test_client(), org_params)
+
+      assert {:error, %{"message" => ^error, "url" => _}} =
+               Api.create_org(test_client(), org_params)
 
       on_exit(fn ->
-        Api.delete_org(test_client(), org: "some_username")
+        Api.delete_org(test_client(), org: org_params.username)
       end)
     end
 
@@ -47,9 +52,10 @@ defmodule Giteax.Organization.ApiTest do
 
   describe "Delete organization api test" do
     test "delete_org/2: success" do
-      assert {:ok, _body} = Api.create_org(test_client(), %{username: "new_org_1"})
+      org_params = build(:org_params)
+      assert {:ok, _body} = Api.create_org(test_client(), org_params)
 
-      assert {:ok, _body} = Api.delete_org(test_client(), org: "new_org_1")
+      assert {:ok, _body} = Api.delete_org(test_client(), org: org_params.username)
     end
 
     test "delete_org/2: already deleted organization" do
@@ -80,13 +86,15 @@ defmodule Giteax.Organization.ApiTest do
 
   describe "Create organization's repository api test" do
     setup _ do
-      {:ok, _body} = Api.create_org(test_client(), %{username: "org_1"})
+      # TODO use body org for context
+      org_params = build(:org_params)
+      {:ok, _body} = Api.create_org(test_client(), org_params)
 
       on_exit(fn ->
-        Api.delete_org(test_client(), org: "org_1")
+        Api.delete_org(test_client(), org: org_params.username)
       end)
 
-      %{org: "org_1"}
+      %{org: org_params.username}
     end
 
     test "create_org_repo/3: success", %{org: org} do
@@ -141,13 +149,14 @@ defmodule Giteax.Organization.ApiTest do
 
   describe "List organization's teams api test" do
     setup _ do
-      {:ok, _body} = Api.create_org(test_client(), %{username: "org_2"})
+      org_params = build(:org_params)
+      {:ok, _body} = Api.create_org(test_client(), org_params)
 
       on_exit(fn ->
-        Api.delete_org(test_client(), org: "org_2")
+        Api.delete_org(test_client(), org: org_params.username)
       end)
 
-      %{org: "org_2"}
+      %{org: org_params.username}
     end
 
     test "list_org_team/3: success", %{org: org} do
@@ -189,13 +198,14 @@ defmodule Giteax.Organization.ApiTest do
 
   describe "Create organization's team api test" do
     setup _ do
-      {:ok, _body} = Api.create_org(test_client(), %{username: "org_3"})
+      org_params = build(:org_params)
+      {:ok, _body} = Api.create_org(test_client(), org_params)
 
       on_exit(fn ->
-        Api.delete_org(test_client(), org: "org_3")
+        Api.delete_org(test_client(), org: org_params.username)
       end)
 
-      %{org: "org_3"}
+      %{org: org_params.username}
     end
 
     test "create_team/3: success", %{org: org} do
@@ -254,13 +264,14 @@ defmodule Giteax.Organization.ApiTest do
 
   describe "Delete organization's team api test" do
     setup _ do
-      {:ok, _body} = Api.create_org(test_client(), %{username: "org_4"})
+      org_params = build(:org_params)
+      {:ok, _body} = Api.create_org(test_client(), org_params)
 
       on_exit(fn ->
-        Api.delete_org(test_client(), org: "org_4")
+        Api.delete_org(test_client(), org: org_params.username)
       end)
 
-      %{org: "org_4"}
+      %{org: org_params.username}
     end
 
     test "delete_team/2: success", %{org: org} do
@@ -300,8 +311,9 @@ defmodule Giteax.Organization.ApiTest do
 
   describe "Add a team member api test" do
     setup _ do
-      {:ok, _body} = Api.create_org(test_client(), %{username: "org_5"})
-      {:ok, body} = Api.create_team(test_client(), %{name: "team_2"}, org: "org_5")
+      org_params = build(:org_params)
+      {:ok, _body} = Api.create_org(test_client(), org_params)
+      {:ok, body} = Api.create_team(test_client(), %{name: "team_2"}, org: org_params.username)
 
       {:ok, user} =
         Giteax.Admin.Api.create_user_by_admin(test_client(), %{
@@ -313,7 +325,7 @@ defmodule Giteax.Organization.ApiTest do
       on_exit(fn ->
         Giteax.Admin.Api.delete_user_by_admin(test_client(), username: "username_4")
         Api.delete_team(test_client(), id: body["id"])
-        Api.delete_org(test_client(), org: "org_5")
+        Api.delete_org(test_client(), org: org_params.username)
       end)
 
       %{team: body, user: user}
@@ -365,8 +377,9 @@ defmodule Giteax.Organization.ApiTest do
 
   describe "Remove a team member api test" do
     setup _ do
-      {:ok, _body} = Api.create_org(test_client(), %{username: "org_7"})
-      {:ok, body} = Api.create_team(test_client(), %{name: "team_2"}, org: "org_7")
+      org_params = build(:org_params)
+      {:ok, _body} = Api.create_org(test_client(), org_params)
+      {:ok, body} = Api.create_team(test_client(), %{name: "team_2"}, org: org_params.username)
 
       {:ok, user} =
         Giteax.Admin.Api.create_user_by_admin(test_client(), %{
@@ -378,7 +391,7 @@ defmodule Giteax.Organization.ApiTest do
       on_exit(fn ->
         Giteax.Admin.Api.delete_user_by_admin(test_client(), username: "username_3")
         Api.delete_team(test_client(), id: body["id"])
-        Api.delete_org(test_client(), org: "org_7")
+        Api.delete_org(test_client(), org: org_params.username)
       end)
 
       %{team: body, user: user}

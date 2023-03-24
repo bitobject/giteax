@@ -1,18 +1,21 @@
 defmodule Giteax.Repository.ApiTest do
   use ExUnit.Case, async: true
 
+  import Giteax.Support.OrganizationFactory
+
   @api_path "/api/v1"
   @params_data_types [0, -1, 0.0, -1.0, "some", "", %{some: :data}, %{"some" => "data"}, [], %{}]
 
   describe "Delete repository api test" do
     setup _ do
-      {:ok, _body} = Giteax.Organization.Api.create_org(test_client(), %{username: "org_6"})
+      org_params = build(:org_params)
+      {:ok, _body} = Giteax.Organization.Api.create_org(test_client(), org_params)
 
       on_exit(fn ->
-        Giteax.Organization.Api.delete_org(test_client(), org: "org_6")
+        Giteax.Organization.Api.delete_org(test_client(), org: org_params.username)
       end)
 
-      %{org: "org_6"}
+      %{org: org_params.username}
     end
 
     test "delete_repo/3: success", %{org: org} do

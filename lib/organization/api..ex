@@ -17,12 +17,18 @@ defmodule Giteax.Organization.Api do
     * `:username` - Username of the organization to create.
 
   ## Body
-  * `:description` - Description of the organization to create.
-  * `:full_name` - Full name of the organization to create.
-  * `:location` - Location of the organization to create.
+  * `:description`
+  * `:full_name`
+  * `:location`
   * `:repo_admin_change_team_access` - Avaliable to change org team members.
-  * `:visibility` - Visibility of the organization to create.
+  * `:visibility` - `default: :public`.
   * `:website` - Website of the organization to create.
+
+  ### Body Details
+  * visibility: can be one of
+    `~w(public limited private)a`
+  * website: validated by regex
+    ~r/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
 
   ## Examples
 
