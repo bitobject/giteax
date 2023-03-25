@@ -1,4 +1,4 @@
-defmodule Giteax.Organization.Schemas.RepoRequestParams do
+defmodule Giteax.Organization.RequestStructs.RepoParams do
   @moduledoc """
   Gitea: request schema for repo creation
   """
@@ -6,7 +6,7 @@ defmodule Giteax.Organization.Schemas.RepoRequestParams do
 
   @fields ~w(auto_init default_branch description gitignores issue_labels license name private readme template trust_model)a
   @required_fields ~w(name)a
-  @derive {Jason.Encoder, only: @fields}
+  @derive Jason.Encoder
   @primary_key false
 
   @type t() :: %__MODULE__{
@@ -23,7 +23,7 @@ defmodule Giteax.Organization.Schemas.RepoRequestParams do
           trust_model: :default | :collaborator | :committer | :collaboratorcommitter
         }
 
-  schema "repo_request_params" do
+  embedded_schema do
     field(:auto_init, :boolean, default: true)
     field(:default_branch, :string)
     field(:description, :string)
@@ -36,7 +36,7 @@ defmodule Giteax.Organization.Schemas.RepoRequestParams do
     field(:template, :boolean, default: false)
 
     field(:trust_model, Ecto.Enum,
-      values: [:default, :collaborator, :committer, :collaboratorcommitter],
+      values: ~w(default collaborator committer collaboratorcommitter)a,
       default: :default
     )
   end

@@ -1,7 +1,7 @@
-defmodule Giteax.Admin.Schemas.UserRequestParamsTest do
+defmodule Giteax.Admin.Schemas.UserRequestStructsTest do
   use ExUnit.Case, async: true
 
-  alias Giteax.Admin.Schemas.UserRequestParams
+  alias Giteax.Admin.Schemas.UserRequestStructs
 
   @required_fields ~w(email password username)a
 
@@ -15,7 +15,7 @@ defmodule Giteax.Admin.Schemas.UserRequestParamsTest do
                 {:email, {"can't be blank", [validation: :required]}},
                 {:password, {"can't be blank", [validation: :required]}},
                 {:username, {"can't be blank", [validation: :required]}}
-              ]} = UserRequestParams.validate(%{})
+              ]} = UserRequestStructs.validate(%{})
 
       assert {:error,
               [
@@ -23,25 +23,25 @@ defmodule Giteax.Admin.Schemas.UserRequestParamsTest do
                 {:password, {"can't be blank", [validation: :required]}},
                 {:username, {"can't be blank", [validation: :required]}}
               ]} ==
-               UserRequestParams.validate(without_req_fields)
+               UserRequestStructs.validate(without_req_fields)
 
       assert {:error, [email: {"has invalid format", [validation: :format]}]} =
-               UserRequestParams.validate(%{
+               UserRequestStructs.validate(%{
                  username: "some",
                  password: "password",
                  email: "email"
                })
 
       assert {:ok,
-              %UserRequestParams{username: "some", password: "password", email: "email@mail.com"}} =
-               UserRequestParams.validate(%{
+              %UserRequestStructs{username: "some", password: "password", email: "email@mail.com"}} =
+               UserRequestStructs.validate(%{
                  username: "some",
                  password: "password",
                  email: "email@mail.com"
                })
 
-      assert {:ok, struct(UserRequestParams, all_params)} ==
-               UserRequestParams.validate(all_params)
+      assert {:ok, struct(UserRequestStructs, all_params)} ==
+               UserRequestStructs.validate(all_params)
     end
 
     test "change/1" do
@@ -55,40 +55,40 @@ defmodule Giteax.Admin.Schemas.UserRequestParamsTest do
       params_with_unknown_fields = Map.put(all_params, :some_field, 5)
       without_req_fields = Map.drop(all_params, @required_fields)
 
-      assert %Ecto.Changeset{valid?: false, errors: ^errors} = UserRequestParams.change(%{})
+      assert %Ecto.Changeset{valid?: false, errors: ^errors} = UserRequestStructs.change(%{})
 
       assert %Ecto.Changeset{valid?: false, errors: ^errors} =
-               UserRequestParams.change(without_req_fields)
+               UserRequestStructs.change(without_req_fields)
 
       assert %Ecto.Changeset{
                valid?: false,
                errors: [email: {"has invalid format", [validation: :format]}],
                changes: %{username: "some", password: "password", email: "email"}
              } =
-               UserRequestParams.change(%{username: "some", password: "password", email: "email"})
+               UserRequestStructs.change(%{username: "some", password: "password", email: "email"})
 
       assert %Ecto.Changeset{
                valid?: true,
                errors: [],
                changes: %{username: "some", password: "password", email: "email@mail.com"}
              } =
-               UserRequestParams.change(%{
+               UserRequestStructs.change(%{
                  username: "some",
                  password: "password",
                  email: "email@mail.com"
                })
 
       assert %Ecto.Changeset{valid?: true, errors: [], changes: ^all_params} =
-               UserRequestParams.change(params_with_unknown_fields)
+               UserRequestStructs.change(params_with_unknown_fields)
     end
 
     test "apply/1" do
       all_params = all_params()
-      changeset = UserRequestParams.change(all_params)
-      empty_changeset = UserRequestParams.change(%{})
+      changeset = UserRequestStructs.change(all_params)
+      empty_changeset = UserRequestStructs.change(%{})
 
-      assert struct(UserRequestParams, all_params) == UserRequestParams.apply(changeset)
-      assert %UserRequestParams{} == UserRequestParams.apply(empty_changeset)
+      assert struct(UserRequestStructs, all_params) == UserRequestStructs.apply(changeset)
+      assert %UserRequestStructs{} == UserRequestStructs.apply(empty_changeset)
     end
   end
 

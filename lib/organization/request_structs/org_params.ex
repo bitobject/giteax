@@ -1,4 +1,4 @@
-defmodule Giteax.Organization.Schemas.OrgRequestParams do
+defmodule Giteax.Organization.RequestStructs.OrgParams do
   @moduledoc """
   Gitea: request schema for ogranization creation
   """
@@ -6,7 +6,7 @@ defmodule Giteax.Organization.Schemas.OrgRequestParams do
 
   @fields ~w(description full_name location repo_admin_change_team_access username visibility website)a
   @required_fields ~w(username)a
-  @derive {Jason.Encoder, only: @fields}
+  @derive Jason.Encoder
   @primary_key false
   @website_regex ~r/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)/
 
@@ -20,7 +20,7 @@ defmodule Giteax.Organization.Schemas.OrgRequestParams do
           website: String.t()
         }
 
-  schema "organization_request_params" do
+  embedded_schema do
     field(:description, :string)
     field(:full_name, :string)
     field(:location, :string)

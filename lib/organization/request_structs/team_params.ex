@@ -1,4 +1,4 @@
-defmodule Giteax.Organization.Schemas.TeamRequestParams do
+defmodule Giteax.Organization.RequestStructs.TeamParams do
   @moduledoc """
   Gitea: request schema for ogranization creation
   """
@@ -7,7 +7,7 @@ defmodule Giteax.Organization.Schemas.TeamRequestParams do
 
   @fields ~w(can_create_org_repo description includes_all_repositories name permission units)a
   @required_fields ~w(name)a
-  @derive {Jason.Encoder, only: @fields}
+  @derive Jason.Encoder
   @primary_key false
   @unit_values ~w(repo.code repo.issues repo.ext_issues repo.wiki repo.pulls repo.releases repo.projects repo.ext_wiki)a
 
@@ -30,7 +30,7 @@ defmodule Giteax.Organization.Schemas.TeamRequestParams do
             )
         }
 
-  schema "organization_request_params" do
+  embedded_schema do
     field(:can_create_org_repo, :boolean, default: true)
     field(:description, :string)
     field(:includes_all_repositories, :boolean, default: true)

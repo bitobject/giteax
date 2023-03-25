@@ -1,60 +1,60 @@
-defmodule Giteax.Organization.Schemas.TeamListRequestParamsTest do
+defmodule Giteax.Organization.RequestStructs.TeamListParamsTest do
   use ExUnit.Case, async: true
 
-  alias Giteax.Organization.Schemas.TeamListRequestParams
+  alias Giteax.Organization.RequestStructs.TeamListParams
 
   describe "TeamList request params test" do
     test "validate/1" do
       all_params = all_params()
 
-      assert {:ok, %TeamListRequestParams{limit: 50, page: 1}} =
-               TeamListRequestParams.validate(%{})
+      assert {:ok, %TeamListParams{limit: 50, page: 1}} =
+               TeamListParams.validate(%{})
 
-      assert {:ok, %TeamListRequestParams{limit: 10, page: 10}} =
-               TeamListRequestParams.validate(%{limit: 10, page: 10})
+      assert {:ok, %TeamListParams{limit: 10, page: 10}} =
+               TeamListParams.validate(%{limit: 10, page: 10})
 
-      assert {:ok, struct(TeamListRequestParams, all_params)} ==
-               TeamListRequestParams.validate(all_params)
+      assert {:ok, struct(TeamListParams, all_params)} ==
+               TeamListParams.validate(all_params)
 
-      assert {:ok, %TeamListRequestParams{limit: 10, page: 10}} =
-               TeamListRequestParams.validate(%{limit: "10", page: "10"})
+      assert {:ok, %TeamListParams{limit: 10, page: 10}} =
+               TeamListParams.validate(%{limit: "10", page: "10"})
 
       assert {:error, [page: {"is invalid", _}, limit: {"is invalid", _}]} =
-               TeamListRequestParams.validate(%{limit: "invalid", page: "invalid"})
+               TeamListParams.validate(%{limit: "invalid", page: "invalid"})
     end
 
     test "change/1" do
       all_params = all_params()
       params_with_unknown_fields = Map.put(all_params, :some_field, 5)
 
-      assert %Ecto.Changeset{valid?: true} = TeamListRequestParams.change(%{})
+      assert %Ecto.Changeset{valid?: true} = TeamListParams.change(%{})
 
       assert %Ecto.Changeset{valid?: true, errors: [], changes: ^all_params} =
-               TeamListRequestParams.change(params_with_unknown_fields)
+               TeamListParams.change(params_with_unknown_fields)
 
       assert %Ecto.Changeset{
                valid?: false,
                errors: [page: {"is invalid", _}, limit: {"is invalid", _}]
-             } = TeamListRequestParams.change(%{limit: "invalid", page: "invalid"})
+             } = TeamListParams.change(%{limit: "invalid", page: "invalid"})
     end
 
     test "apply/1" do
       all_params = all_params()
-      changeset = TeamListRequestParams.change(all_params)
-      empty_changeset = TeamListRequestParams.change(%{})
+      changeset = TeamListParams.change(all_params)
+      empty_changeset = TeamListParams.change(%{})
 
-      assert struct(TeamListRequestParams, all_params) == TeamListRequestParams.apply(changeset)
-      assert %TeamListRequestParams{} == TeamListRequestParams.apply(empty_changeset)
+      assert struct(TeamListParams, all_params) == TeamListParams.apply(changeset)
+      assert %TeamListParams{} == TeamListParams.apply(empty_changeset)
     end
 
     test "to_list/1" do
-      base = %TeamListRequestParams{}
+      base = %TeamListParams{}
       all_params = all_params()
-      all_params_struct = struct(TeamListRequestParams, all_params)
+      all_params_struct = struct(TeamListParams, all_params)
 
-      assert [limit: 50, page: 1] == TeamListRequestParams.to_list(base)
-      assert [limit: 0, page: 0] == TeamListRequestParams.to_list(all_params)
-      assert [limit: 0, page: 0] == TeamListRequestParams.to_list(all_params_struct)
+      assert [limit: 50, page: 1] == TeamListParams.to_list(base)
+      assert [limit: 0, page: 0] == TeamListParams.to_list(all_params)
+      assert [limit: 0, page: 0] == TeamListParams.to_list(all_params_struct)
     end
   end
 

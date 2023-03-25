@@ -3,7 +3,7 @@ defmodule Giteax.Admin.Api do
   User API for Gitea
   """
 
-  alias Giteax.Admin.Schemas.UserRequestParams
+  alias Giteax.Admin.Schemas.UserRequestStructs
   alias Giteax.PathParams
   alias Giteax.Response
 
@@ -41,7 +41,7 @@ defmodule Giteax.Admin.Api do
           required(:username) => String.t()
         }) :: {:ok, any()} | {:error, any()}
   def create_user_by_admin(%Tesla.Client{} = client, body) when map_size(body) > 2 do
-    with {:ok, %UserRequestParams{} = struct} <- UserRequestParams.validate(body) do
+    with {:ok, %UserRequestStructs{} = struct} <- UserRequestStructs.validate(body) do
       client
       |> Tesla.post("/admin/users", struct)
       |> Response.handle()

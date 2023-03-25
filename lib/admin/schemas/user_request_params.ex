@@ -1,4 +1,4 @@
-defmodule Giteax.Admin.Schemas.UserRequestParams do
+defmodule Giteax.Admin.Schemas.UserRequestStructs do
   @moduledoc """
   Gitea: request schema for user creation
   """
@@ -6,7 +6,7 @@ defmodule Giteax.Admin.Schemas.UserRequestParams do
 
   @fields ~w(email full_name login_name must_change_password password send_notify source_id username visibility)a
   @required_fields ~w(email password username)a
-  @derive {Jason.Encoder, only: @fields}
+  @derive Jason.Encoder
   @primary_key false
   @email_regex ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i
 
@@ -22,7 +22,7 @@ defmodule Giteax.Admin.Schemas.UserRequestParams do
           visibility: String.t()
         }
 
-  schema "repo_request_params" do
+  embedded_schema do
     field(:email, :string)
     field(:full_name, :string)
     field(:login_name, :string)

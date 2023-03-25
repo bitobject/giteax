@@ -3,10 +3,12 @@ defmodule Giteax.Organization.Api do
   Organization API for Gitea
   """
 
-  alias Giteax.Organization.Schemas.RepoRequestParams
-  alias Giteax.Organization.Schemas.OrgRequestParams
-  alias Giteax.Organization.Schemas.TeamRequestParams
-  alias Giteax.Organization.Schemas.TeamListRequestParams
+  alias Giteax.Organization.RequestStructs.RepoParams
+  alias Giteax.Organization.RequestStructs.OrgParams
+  alias Giteax.Organization.RequestStructs.TeamParams
+  alias Giteax.Organization.RequestStructs.TeamListParams
+  alias Giteax.Organization.Schemas.Org
+  alias Giteax.Organization.Schemas.Repo
   alias Giteax.PathParams
   alias Giteax.Response
 
@@ -33,18 +35,18 @@ defmodule Giteax.Organization.Api do
   ## Examples
 
       iex> create_org(%Tesla.Client{}, %{username: "username"})
-      {:ok, body}
+      {:ok, %Giteax.Organization.Schemas.Org{}}
 
       iex> create_org(%Tesla.Client{}, %{username: "already_inserted_username"})
       {:error, errors}
   """
   @spec create_org(Tesla.Client.t(), %{required(:username) => String.t()}) ::
-          {:ok, any()} | {:error, any()}
+          {:ok, Org.t() | any()} | {:error, any()}
   def create_org(%Tesla.Client{} = client, body) when map_size(body) > 0 do
-    with {:ok, %OrgRequestParams{} = struct} <- OrgRequestParams.validate(body) do
+    with {:ok, %OrgParams{} = struct} <- OrgParams.validate(body) do
       client
       |> Tesla.post("/orgs", struct)
-      |> Response.handle()
+      |> Response.handle(&Org.parse/1)
     end
   end
 
@@ -113,14 +115,14 @@ defmodule Giteax.Organization.Api do
       {:error, errors}
   """
   @spec create_org_repo(Tesla.Client.t(), %{required(:name) => String.t()}, org: String.t()) ::
-          {:ok, any()} | {:error, any()}
+          {:ok, Repo.t() | any()} | {:error, any()}
   def create_org_repo(%Tesla.Client{} = client, body, params)
       when map_size(body) > 0 and is_list(params) do
-    with {:ok, %RepoRequestParams{} = struct} <- RepoRequestParams.validate(body),
+    with {:ok, %RepoParams{} = struct} <- RepoParams.validate(body),
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
       client
       |> Tesla.post("/orgs/:org/repos", struct, opts: [path_params: validated_params])
-      |> Response.handle()
+      |> Response.handle(&Repo.parse/1)
     end
   end
 
@@ -158,9 +160,9 @@ defmodule Giteax.Organization.Api do
         ) :: {:ok, any()} | {:error, any()}
   def list_org_team(%Tesla.Client{} = client, body, params)
       when is_map(body) and is_list(params) do
-    with {:ok, %TeamListRequestParams{} = struct} <- TeamListRequestParams.validate(body),
+    with {:ok, %TeamListParams{} = struct} <- TeamListParams.validate(body),
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
-      query = TeamListRequestParams.to_list(struct)
+      query = TeamListParams.to_list(struct)
 
       client
       |> Tesla.get("/orgs/:org/teams", query: query, opts: [path_params: validated_params])
@@ -274,7 +276,7 @@ defmodule Giteax.Organization.Api do
   def create_team(%Tesla.Client{} = client, body, params)
       when map_size(body) > 0 and is_list(params) do
     with {:ok, validated_params} <- PathParams.validate(params, [:org]),
-         {:ok, %TeamRequestParams{} = struct} <- TeamRequestParams.validate(body) do
+         {:ok, %TeamParams{} = struct} <- TeamParams.validate(body) do
       client
       |> Tesla.post("/orgs/:org/teams", struct, opts: [path_params: validated_params])
       |> Response.handle()

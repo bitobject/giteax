@@ -1,16 +1,16 @@
-defmodule Giteax.Organization.Schemas.TeamListRequestParams do
+defmodule Giteax.Organization.RequestStructs.TeamListParams do
   @moduledoc """
   Gitea: request schema for repo creation
   """
   use Ecto.Schema
 
   @fields ~w(page limit)a
-  @derive {Jason.Encoder, only: @fields}
+  @derive Jason.Encoder
   @primary_key false
 
   @type t() :: %__MODULE__{page: boolean(), limit: String.t()}
 
-  schema "team_list_requests_params" do
+  embedded_schema do
     field(:page, :integer, default: 1)
     field(:limit, :integer, default: 50)
   end
