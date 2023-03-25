@@ -1,4 +1,4 @@
-defmodule Giteax.Admin.Schemas.UserRequestStructs do
+defmodule Giteax.Admin.RequestStructs.UserParams do
   @moduledoc """
   Gitea: request schema for user creation
   """
