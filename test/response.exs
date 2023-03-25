@@ -14,7 +14,7 @@ defmodule Giteax.ResponseTest do
       assert {:error, :body} = Response.handle({:ok, %Tesla.Env{status: 300, body: :body}})
       assert {:error, :body} = Response.handle({:ok, %Tesla.Env{status: 300, body: :body}})
       assert {:error, :body} = Response.handle({:ok, %Tesla.Env{status: 400, body: :body}})
-      assert {:error, :body} = Response.handle({:ok, %Tesla.Env{status: 500, body: :body}})
+      assert {:error, :body} = Response.handle({:ok, %Tesla.Env{status: 511, body: :body}})
     end
 
     test "handle/1 error response" do
