@@ -7,8 +7,7 @@ defmodule Giteax.Organization.RequestStructs.TeamListParamsTest do
     test "validate/1" do
       all_params = all_params()
 
-      assert {:ok, %TeamListParams{limit: 50, page: 1}} =
-               TeamListParams.validate(%{})
+      assert {:ok, %TeamListParams{limit: 50, page: 1}} = TeamListParams.validate(%{})
 
       assert {:ok, %TeamListParams{limit: 10, page: 10}} =
                TeamListParams.validate(%{limit: 10, page: 10})
