@@ -340,8 +340,8 @@ defmodule Giteax.Organization.ApiTest do
     end
 
     test "add_team_member/2: success", %{team: team, user: user} do
-      # TODO make body struct and get id for delete
-      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
+      # TODO get team members and check
+      assert {:ok, ""} = Api.add_team_member(test_client(), id: team.id, username: user.login)
 
       on_exit(fn ->
         Api.delete_team_member(test_client(), id: team.id, username: user.login)
@@ -349,11 +349,8 @@ defmodule Giteax.Organization.ApiTest do
     end
 
     test "add_team_member/2: no error for second attempt", %{team: team, user: user} do
-      # TODO make body struct and get id for delete
-
-      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
-
-      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
+      assert {:ok, ""} = Api.add_team_member(test_client(), id: team.id, username: user.login)
+      assert {:ok, ""} = Api.add_team_member(test_client(), id: team.id, username: user.login)
 
       on_exit(fn ->
         Api.delete_team_member(test_client(), id: team.id, username: user.login)
@@ -401,23 +398,17 @@ defmodule Giteax.Organization.ApiTest do
     end
 
     test "delete_team_member/2: success", %{team: team, user: user} do
-      # TODO make body struct and get id for delete
-      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
-
-      assert {:ok, _body} =
-               Api.delete_team_member(test_client(), id: team.id, username: user.login)
+      # TODO check all team members
+      assert {:ok, ""} = Api.add_team_member(test_client(), id: team.id, username: user.login)
+      assert {:ok, ""} = Api.delete_team_member(test_client(), id: team.id, username: user.login)
     end
 
     test "delete_team_member/2: no error for second attempt", %{team: team, user: user} do
-      # TODO make body struct and get id for delete
+      # TODO check all team members
 
-      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
-
-      assert {:ok, _body} =
-               Api.delete_team_member(test_client(), id: team.id, username: user.login)
-
-      assert {:ok, _body} =
-               Api.delete_team_member(test_client(), id: team.id, username: user.login)
+      assert {:ok, ""} = Api.add_team_member(test_client(), id: team.id, username: user.login)
+      assert {:ok, ""} = Api.delete_team_member(test_client(), id: team.id, username: user.login)
+      assert {:ok, ""} = Api.delete_team_member(test_client(), id: team.id, username: user.login)
     end
 
     test "delete_team_member/2: invalid client", %{team: team, user: user} do
