@@ -12,7 +12,7 @@ defmodule Giteax.Response do
       do: {:ok, function.(resp_body)}
 
   def handle({:ok, %Tesla.Env{body: resp_body}}, _function), do: {:error, resp_body}
-  def handle({:error, error}, _function), do: {:error, error}
+  def handle({:error, error}, _function), do: {:error, Giteax.Error.parse(error)}
   def handle(error, _function), do: {:error, error}
 
   defp default_function(term), do: term

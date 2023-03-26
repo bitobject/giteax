@@ -11,7 +11,7 @@ defmodule Giteax.Organization.Schemas.Repo do
   alias Giteax.Admin.Schemas.User
   alias Giteax.Organization.Schemas.Permission
 
-  @behaviour Giteax.Module
+  @behaviour Giteax.ReponseFiller
   @fields ~w(allow_merge_commits allow_rebase allow_rebase_explicit allow_squash_merge archived avatar_url clone_url created_at default_branch default_merge_style description empty fork forks_count full_name has_issues has_projects has_pull_requests has_wiki html_url id ignore_whitespace_conflicts internal mirror mirror_interval name open_issues_count open_pr_counter original_url parent private release_counter size ssh_url stars_count template updated_at watchers_count website)a
   @derive Jason.Encoder
   @primary_key false
@@ -111,15 +111,15 @@ defmodule Giteax.Organization.Schemas.Repo do
     embeds_one :permissions, Permission
   end
 
-  @impl Giteax.Module
-  def parse(nil), do: nil
+  @impl Giteax.ReponseFiller
+  def process(nil), do: nil
 
-  def parse(params) do
-    external_tracker = ExternalTracker.parse(params["external_tracker"])
-    external_wiki = ExternalWiki.parse(params["external_wiki"])
-    internal_tracker = InternalTracker.parse(params["internal_tracker"])
-    owner = User.parse(params["owner"])
-    permissions = Permission.parse(params["permissions"])
+  def process(params) do
+    external_tracker = ExternalTracker.process(params["external_tracker"])
+    external_wiki = ExternalWiki.process(params["external_wiki"])
+    internal_tracker = InternalTracker.process(params["internal_tracker"])
+    owner = User.process(params["owner"])
+    permissions = Permission.process(params["permissions"])
 
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)
@@ -131,17 +131,17 @@ defmodule Giteax.Organization.Schemas.Repo do
     |> Ecto.Changeset.apply_changes()
   end
 
-  @impl Giteax.Module
-  def parse_list(nil), do: []
-  def parse_list([]), do: []
+  @impl Giteax.ReponseFiller
+  def process_list(nil), do: []
+  def process_list([]), do: []
 
-  def parse_list(list) do
+  def process_list(list) do
     for params <- list do
-      external_tracker = ExternalTracker.parse(params["external_tracker"])
-      external_wiki = ExternalWiki.parse(params["external_wiki"])
-      internal_tracker = InternalTracker.parse(params["internal_tracker"])
-      owner = User.parse(params["owner"])
-      permissions = Permission.parse(params["permissions"])
+      external_tracker = ExternalTracker.process(params["external_tracker"])
+      external_wiki = ExternalWiki.process(params["external_wiki"])
+      internal_tracker = InternalTracker.process(params["internal_tracker"])
+      owner = User.process(params["owner"])
+      permissions = Permission.process(params["permissions"])
 
       %__MODULE__{}
       |> Ecto.Changeset.cast(params, @fields)

@@ -5,7 +5,7 @@ defmodule Giteax.Organization.Schemas.ExternalWiki do
 
   use Ecto.Schema
 
-  @behaviour Giteax.Module
+  @behaviour Giteax.ReponseFiller
   @fields ~w(external_wiki_url)a
   @derive Jason.Encoder
   @primary_key false
@@ -16,20 +16,20 @@ defmodule Giteax.Organization.Schemas.ExternalWiki do
     field(:external_wiki_url, :string)
   end
 
-  @impl Giteax.Module
-  def parse(nil), do: nil
+  @impl Giteax.ReponseFiller
+  def process(nil), do: nil
 
-  def parse(params) do
+  def process(params) do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)
     |> Ecto.Changeset.apply_changes()
   end
 
-  @impl Giteax.Module
-  def parse_list(nil), do: []
-  def parse_list([]), do: []
+  @impl Giteax.ReponseFiller
+  def process_list(nil), do: []
+  def process_list([]), do: []
 
-  def parse_list(list) do
+  def process_list(list) do
     for params <- list do
       %__MODULE__{}
       |> Ecto.Changeset.cast(params, @fields)

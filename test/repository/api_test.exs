@@ -3,32 +3,41 @@ defmodule Giteax.Repository.ApiTest do
 
   import Giteax.Support.OrganizationFactory
 
+  alias Giteax.Organization.Schemas.Org
+  alias Giteax.Organization.Schemas.Repo
+
   @api_path "/api/v1"
   @params_data_types [0, -1, 0.0, -1.0, "some", "", %{some: :data}, %{"some" => "data"}, [], %{}]
 
   describe "Delete repository api test" do
     setup _ do
       org_params = build(:org_params)
-      {:ok, _body} = Giteax.Organization.Api.create_org(test_client(), org_params)
+      {:ok, %Org{} = org} = Giteax.Organization.Api.create_org(test_client(), org_params)
 
       on_exit(fn ->
-        Giteax.Organization.Api.delete_org(test_client(), org: org_params.username)
+        Giteax.Organization.Api.delete_org(test_client(), org: org.username)
       end)
 
-      %{org: org_params.username}
+      %{org: org}
     end
 
     test "delete_repo/3: success", %{org: org} do
-      assert {:ok, _body} =
-               Giteax.Organization.Api.create_org_repo(test_client(), %{name: "repo_2"}, org: org)
+      assert {:ok, %Repo{} = repo} =
+               Giteax.Organization.Api.create_org_repo(test_client(), build(:repo_params),
+                 org: org.username
+               )
 
-      assert {:ok, _body} =
-               Giteax.Repository.Api.delete_repo(test_client(), repo: "repo_2", owner: org)
+      assert {:ok, ""} =
+               Giteax.Repository.Api.delete_repo(test_client(),
+                 repo: repo.name,
+                 owner: org.username
+               )
     end
 
-    test "delete_repo/3: already deleted organization", %{org: org} do
-      assert {:error, _error} =
-               Giteax.Repository.Api.delete_repo(test_client(), repo: "repo_2", owner: org)
+    test "delete_repo/3: already deleted repository", %{org: org} do
+      # TODO parse errors
+      assert {:error, _errors} =
+               Giteax.Repository.Api.delete_repo(test_client(), repo: "repo", owner: org.username)
     end
 
     test "delete_repo/3: invalid params" do
@@ -44,7 +53,8 @@ defmodule Giteax.Repository.ApiTest do
       error = {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 
       for data <- @params_data_types do
-        assert error == Giteax.Repository.Api.delete_repo(data, repo: "repo_2", owner: org),
+        assert error ==
+                 Giteax.Repository.Api.delete_repo(data, repo: "repo", owner: org.username),
                "data: #{inspect(data)}"
       end
     end

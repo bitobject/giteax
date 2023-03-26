@@ -45,7 +45,7 @@ defmodule Giteax.Admin.Api do
     with {:ok, %UserParams{} = struct} <- UserParams.validate(body) do
       client
       |> Tesla.post("/admin/users", struct)
-      |> Response.handle(&User.parse/1)
+      |> Response.handle(&User.process/1)
     end
   end
 

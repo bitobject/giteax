@@ -47,7 +47,7 @@ defmodule Giteax.Organization.Api do
     with {:ok, %OrgParams{} = struct} <- OrgParams.validate(body) do
       client
       |> Tesla.post("/orgs", struct)
-      |> Response.handle(&Org.parse/1)
+      |> Response.handle(&Org.process/1)
     end
   end
 
@@ -123,7 +123,7 @@ defmodule Giteax.Organization.Api do
          {:ok, validated_params} <- PathParams.validate(params, [:org]) do
       client
       |> Tesla.post("/orgs/:org/repos", struct, opts: [path_params: validated_params])
-      |> Response.handle(&Repo.parse/1)
+      |> Response.handle(&Repo.process/1)
     end
   end
 
@@ -167,7 +167,7 @@ defmodule Giteax.Organization.Api do
 
       client
       |> Tesla.get("/orgs/:org/teams", query: query, opts: [path_params: validated_params])
-      |> Response.handle(&Team.parse_list/1)
+      |> Response.handle(&Team.process_list/1)
     end
   end
 
@@ -280,7 +280,7 @@ defmodule Giteax.Organization.Api do
          {:ok, %TeamParams{} = struct} <- TeamParams.validate(body) do
       client
       |> Tesla.post("/orgs/:org/teams", struct, opts: [path_params: validated_params])
-      |> Response.handle(&Team.parse/1)
+      |> Response.handle(&Team.process/1)
     end
   end
 
