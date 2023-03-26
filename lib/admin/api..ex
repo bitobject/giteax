@@ -4,6 +4,7 @@ defmodule Giteax.Admin.Api do
   """
 
   alias Giteax.Admin.RequestStructs.UserParams
+  alias Giteax.Admin.Schemas.User
   alias Giteax.PathParams
   alias Giteax.Response
 
@@ -30,7 +31,7 @@ defmodule Giteax.Admin.Api do
   ## Examples
 
       iex> create_user_by_admin(%Tesla.Client{}, %{email: "email", password: "password", username: "username"})
-      {:ok, %Tesla.Env{}}
+      {:ok, %Giteax.Admin.Schemas.User{}}
 
       iex> create_user_by_admin(%Tesla.Client{}, %{email: "invalid_email", password: "invalid_password", username: "invalid_username"})
       {:error, errors}
@@ -39,12 +40,12 @@ defmodule Giteax.Admin.Api do
           required(:email) => String.t(),
           required(:password) => String.t(),
           required(:username) => String.t()
-        }) :: {:ok, any()} | {:error, any()}
+        }) :: {:ok, User.t() | any()} | {:error, any()}
   def create_user_by_admin(%Tesla.Client{} = client, body) when map_size(body) > 2 do
     with {:ok, %UserParams{} = struct} <- UserParams.validate(body) do
       client
       |> Tesla.post("/admin/users", struct)
-      |> Response.handle()
+      |> Response.handle(&User.parse/1)
     end
   end
 
@@ -63,7 +64,7 @@ defmodule Giteax.Admin.Api do
   ## Examples
 
       iex> delete_user_by_admin(%Tesla.Client{}, [username: "username"])
-      {:ok, %Tesla.Env{}}
+      {:ok, body}
 
       iex> delete_user_by_admin(%Tesla.Client{}, [username: "invalid_username"])
       {:error, errors}

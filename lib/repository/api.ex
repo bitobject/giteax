@@ -16,7 +16,7 @@ defmodule Giteax.Repository.Api do
   ## Examples
 
       iex> delete_repo(%Tesla.Client{}, [repo: "repo", owner: "owner"])
-      {:ok, %Tesla.Env{}}
+      {:ok, body}
 
       iex> delete_repo(%Tesla.Client{}, [repo: "repo", owner: "owner"])
       {:error, error}

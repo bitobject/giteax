@@ -6,6 +6,8 @@ defmodule Giteax.Organization.ApiTest do
   alias Giteax.Organization.Api
   alias Giteax.Organization.Schemas.Org
   alias Giteax.Organization.Schemas.Repo
+  alias Giteax.Organization.Schemas.Team
+  alias Giteax.Admin.Schemas.User
 
   @api_path "/api/v1"
   @body_data_types [0, -1, 0.0, -1.0, "some", "", [some: :data], [{"some", "data"}], [], %{}]
@@ -163,13 +165,12 @@ defmodule Giteax.Organization.ApiTest do
     end
 
     test "list_org_team/3: success", %{org: org} do
-      assert {:ok, _body} =
-               Api.list_org_team(test_client(), %{page_number: 1, limit: 5}, org: org.username)
+      assert {:ok, [%Giteax.Organization.Schemas.Team{name: "Owners", permission: :owner}]} =
+               Api.list_org_team(test_client(), %{page: 1, limit: 5}, org: org.username)
     end
 
-    test "list_org_team/3: already insert error", %{org: org} do
-      assert {:ok, _body} =
-               Api.list_org_team(test_client(), %{page_number: 0, limit: 0}, org: org.username)
+    test "list_org_team/3: empty list", %{org: org} do
+      assert {:ok, []} = Api.list_org_team(test_client(), %{page: 2, limit: 1}, org: org.username)
     end
 
     test "list_org_team/3: invalid body", %{org: org} do
@@ -185,7 +186,7 @@ defmodule Giteax.Organization.ApiTest do
       error = {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 
       for data <- @body_data_types do
-        assert error == Api.list_org_team(data, %{name: "repo_4"}, org: org.username),
+        assert error == Api.list_org_team(data, %{page: 1}, org: org.username),
                "data: #{inspect(data)}"
       end
     end
@@ -194,7 +195,7 @@ defmodule Giteax.Organization.ApiTest do
       error = {:error, %{field: :params, errors: ["expected to be a keyword list"]}}
 
       for data <- @params_data_types do
-        assert error == Api.list_org_team(test_client(), %{name: "repo_5"}, data),
+        assert error == Api.list_org_team(test_client(), %{page: 2}, data),
                "data: #{inspect(data)}"
       end
     end
@@ -213,20 +214,18 @@ defmodule Giteax.Organization.ApiTest do
     end
 
     test "create_team/3: success", %{org: org} do
-      # TODO make body struct and get id for delete
-      assert {:ok, body} = Api.create_team(test_client(), %{name: "team_2"}, org: org.username)
+      # TODO make factories
+      assert {:ok, %Team{} = team} =
+               Api.create_team(test_client(), %{name: "team_2"}, org: org.username)
 
       on_exit(fn ->
-        Api.delete_team(test_client(), id: body["id"])
+        Api.delete_team(test_client(), id: team.id)
       end)
     end
 
     test "create_team/3: already insert error", %{org: org} do
-      # TODO make body struct and get id for delete
-      # TODO add org struct and get org id,
-      # TODO format tail to [org_id: 592, name: team_3]
-
-      assert {:ok, body} = Api.create_team(test_client(), %{name: "team_3"}, org: org.username)
+      assert {:ok, %Team{} = team} =
+               Api.create_team(test_client(), %{name: "team_3"}, org: org.username)
 
       assert {:error,
               %{
@@ -235,7 +234,7 @@ defmodule Giteax.Organization.ApiTest do
               }} = Api.create_team(test_client(), %{name: "team_3"}, org: org.username)
 
       on_exit(fn ->
-        Api.delete_team(test_client(), id: body["id"])
+        Api.delete_team(test_client(), id: team.id)
       end)
     end
 
@@ -281,20 +280,24 @@ defmodule Giteax.Organization.ApiTest do
 
     test "delete_team/2: success", %{org: org} do
       # TODO add check with get team
-      assert {:ok, body} = Api.create_team(test_client(), %{name: "team_2"}, org: org.username)
-      assert {:ok, _body} = Api.delete_team(test_client(), id: body["id"])
+      assert {:ok, %Team{} = team} =
+               Api.create_team(test_client(), %{name: "team_2"}, org: org.username)
+
+      assert {:ok, _body} = Api.delete_team(test_client(), id: team.id)
     end
 
     test "delete_team/2: already deleted organization", %{org: org} do
-      assert {:ok, body} = Api.create_team(test_client(), %{name: "team_3"}, org: org.username)
-      assert {:ok, _body} = Api.delete_team(test_client(), id: body["id"])
+      assert {:ok, %Team{} = team} =
+               Api.create_team(test_client(), %{name: "team_3"}, org: org.username)
+
+      assert {:ok, _body} = Api.delete_team(test_client(), id: team.id)
 
       assert {:error,
               %{
                 "errors" => nil,
                 "message" => "The target couldn't be found.",
                 "url" => _
-              }} = Api.delete_team(test_client(), id: body["id"])
+              }} = Api.delete_team(test_client(), id: team.id)
     end
 
     test "delete_team/2: invalid params" do
@@ -318,9 +321,9 @@ defmodule Giteax.Organization.ApiTest do
     setup _ do
       org_params = build(:org_params)
       {:ok, %Org{} = org} = Api.create_org(test_client(), org_params)
-      {:ok, body} = Api.create_team(test_client(), %{name: "team_2"}, org: org.username)
+      {:ok, %Team{} = team} = Api.create_team(test_client(), %{name: "team_2"}, org: org.username)
 
-      {:ok, user} =
+      {:ok, %User{} = user} =
         Giteax.Admin.Api.create_user_by_admin(test_client(), %{
           email: "email1@mail.com",
           password: "password",
@@ -329,36 +332,31 @@ defmodule Giteax.Organization.ApiTest do
 
       on_exit(fn ->
         Giteax.Admin.Api.delete_user_by_admin(test_client(), username: "username_4")
-        Api.delete_team(test_client(), id: body["id"])
+        Api.delete_team(test_client(), id: team.id)
         Api.delete_org(test_client(), org: org.username)
       end)
 
-      %{team: body, user: user}
+      %{team: team, user: user}
     end
 
     test "add_team_member/2: success", %{team: team, user: user} do
       # TODO make body struct and get id for delete
-      assert {:ok, _body} =
-               Api.add_team_member(test_client(), id: team["id"], username: user["login"])
+      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
 
       on_exit(fn ->
-        Api.delete_team_member(test_client(), id: team["id"], username: user["login"])
+        Api.delete_team_member(test_client(), id: team.id, username: user.login)
       end)
     end
 
     test "add_team_member/2: no error for second attempt", %{team: team, user: user} do
       # TODO make body struct and get id for delete
-      # TODO add org struct and get org id,
-      # TODO format tail to [org_id: 592, name: team_3]
 
-      assert {:ok, _body} =
-               Api.add_team_member(test_client(), id: team["id"], username: user["login"])
+      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
 
-      assert {:ok, _body} =
-               Api.add_team_member(test_client(), id: team["id"], username: user["login"])
+      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
 
       on_exit(fn ->
-        Api.delete_team_member(test_client(), id: team["id"], username: user["login"])
+        Api.delete_team_member(test_client(), id: team.id, username: user.login)
       end)
     end
 
@@ -366,7 +364,7 @@ defmodule Giteax.Organization.ApiTest do
       error = {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 
       for data <- @body_data_types do
-        assert error == Api.add_team_member(data, id: team["id"], username: user["login"]),
+        assert error == Api.add_team_member(data, id: team.id, username: user.login),
                "data: #{inspect(data)}"
       end
     end
@@ -384,9 +382,9 @@ defmodule Giteax.Organization.ApiTest do
     setup _ do
       org_params = build(:org_params)
       {:ok, %Org{} = org} = Api.create_org(test_client(), org_params)
-      {:ok, body} = Api.create_team(test_client(), %{name: "team_2"}, org: org.username)
+      {:ok, %Team{} = team} = Api.create_team(test_client(), %{name: "team_2"}, org: org.username)
 
-      {:ok, user} =
+      {:ok, %User{} = user} =
         Giteax.Admin.Api.create_user_by_admin(test_client(), %{
           email: "email2@mail.com",
           password: "password",
@@ -395,42 +393,38 @@ defmodule Giteax.Organization.ApiTest do
 
       on_exit(fn ->
         Giteax.Admin.Api.delete_user_by_admin(test_client(), username: "username_3")
-        Api.delete_team(test_client(), id: body["id"])
+        Api.delete_team(test_client(), id: team.id)
         Api.delete_org(test_client(), org: org.username)
       end)
 
-      %{team: body, user: user}
+      %{team: team, user: user}
     end
 
     test "delete_team_member/2: success", %{team: team, user: user} do
       # TODO make body struct and get id for delete
-      assert {:ok, _body} =
-               Api.add_team_member(test_client(), id: team["id"], username: user["login"])
+      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
 
       assert {:ok, _body} =
-               Api.delete_team_member(test_client(), id: team["id"], username: user["login"])
+               Api.delete_team_member(test_client(), id: team.id, username: user.login)
     end
 
     test "delete_team_member/2: no error for second attempt", %{team: team, user: user} do
       # TODO make body struct and get id for delete
-      # TODO add org struct and get org id,
-      # TODO format tail to [org_id: 592, name: team_3]
+
+      assert {:ok, _body} = Api.add_team_member(test_client(), id: team.id, username: user.login)
 
       assert {:ok, _body} =
-               Api.add_team_member(test_client(), id: team["id"], username: user["login"])
+               Api.delete_team_member(test_client(), id: team.id, username: user.login)
 
       assert {:ok, _body} =
-               Api.delete_team_member(test_client(), id: team["id"], username: user["login"])
-
-      assert {:ok, _body} =
-               Api.delete_team_member(test_client(), id: team["id"], username: user["login"])
+               Api.delete_team_member(test_client(), id: team.id, username: user.login)
     end
 
     test "delete_team_member/2: invalid client", %{team: team, user: user} do
       error = {:error, %{field: :client, errors: ["expected to be %Tesla.Client{} struct"]}}
 
       for data <- @body_data_types do
-        assert error == Api.delete_team_member(data, id: team["id"], username: user["login"]),
+        assert error == Api.delete_team_member(data, id: team.id, username: user.login),
                "data: #{inspect(data)}"
       end
     end

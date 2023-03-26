@@ -9,6 +9,7 @@ defmodule Giteax.Organization.Api do
   alias Giteax.Organization.RequestStructs.TeamListParams
   alias Giteax.Organization.Schemas.Org
   alias Giteax.Organization.Schemas.Repo
+  alias Giteax.Organization.Schemas.Team
   alias Giteax.PathParams
   alias Giteax.Response
 
@@ -142,22 +143,22 @@ defmodule Giteax.Organization.Api do
   * `:org` - the organization's name.
 
   ## Body
-  * `:page_number` - page number of results to return, default: `1`
+  * `:page` - page number of results to return, default: `1`
   * `:limit` - page size of results, default: `50`
 
   ## Examples
 
-      iex> list_org_team(%Tesla.Client{}, %{page_number: 1, limit: 1}, [org: "org"])
+      iex> list_org_team(%Tesla.Client{}, %{page: 1, limit: 1}, [org: "org"])
       {:ok, body}
 
-      iex> list_org_team(%Tesla.Client{}, %{page_number: 1, limit: 1}, [org: "bad_org"])
+      iex> list_org_team(%Tesla.Client{}, %{page: 1, limit: 1}, [org: "bad_org"])
       {:error, errors}
   """
   @spec list_org_team(
           Tesla.Client.t(),
-          %{required(:page_number) => number(), required(:limit) => number()},
+          %{required(:page) => number(), required(:limit) => number()},
           org: String.t()
-        ) :: {:ok, any()} | {:error, any()}
+        ) :: {:ok, list(Team.t()) | any()} | {:error, any()}
   def list_org_team(%Tesla.Client{} = client, body, params)
       when is_map(body) and is_list(params) do
     with {:ok, %TeamListParams{} = struct} <- TeamListParams.validate(body),
@@ -166,7 +167,7 @@ defmodule Giteax.Organization.Api do
 
       client
       |> Tesla.get("/orgs/:org/teams", query: query, opts: [path_params: validated_params])
-      |> Response.handle()
+      |> Response.handle(&Team.parse_list/1)
     end
   end
 
@@ -272,14 +273,14 @@ defmodule Giteax.Organization.Api do
       {:error, errors}
   """
   @spec create_team(Tesla.Client.t(), %{required(:name) => String.t()}, org: String.t()) ::
-          {:ok, any()} | {:error, any()}
+          {:ok, Team.t() | any()} | {:error, any()}
   def create_team(%Tesla.Client{} = client, body, params)
       when map_size(body) > 0 and is_list(params) do
     with {:ok, validated_params} <- PathParams.validate(params, [:org]),
          {:ok, %TeamParams{} = struct} <- TeamParams.validate(body) do
       client
       |> Tesla.post("/orgs/:org/teams", struct, opts: [path_params: validated_params])
-      |> Response.handle()
+      |> Response.handle(&Team.parse/1)
     end
   end
 

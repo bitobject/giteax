@@ -1,4 +1,4 @@
-defmodule Giteax.Organization.Schemas.User do
+defmodule Giteax.Admin.Schemas.User do
   @moduledoc """
   User struct.
   """
@@ -61,5 +61,17 @@ defmodule Giteax.Organization.Schemas.User do
     %__MODULE__{}
     |> Ecto.Changeset.cast(params, @fields)
     |> Ecto.Changeset.apply_changes()
+  end
+
+  @impl Giteax.Module
+  def parse_list(nil), do: []
+  def parse_list([]), do: []
+
+  def parse_list(list) do
+    for params <- list do
+      %__MODULE__{}
+      |> Ecto.Changeset.cast(params, @fields)
+      |> Ecto.Changeset.apply_changes()
+    end
   end
 end

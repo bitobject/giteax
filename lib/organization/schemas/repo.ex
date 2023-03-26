@@ -8,7 +8,7 @@ defmodule Giteax.Organization.Schemas.Repo do
   alias Giteax.Organization.Schemas.ExternalTracker
   alias Giteax.Organization.Schemas.ExternalWiki
   alias Giteax.Organization.Schemas.InternalTracker
-  alias Giteax.Organization.Schemas.User
+  alias Giteax.Admin.Schemas.User
   alias Giteax.Organization.Schemas.Permission
 
   @behaviour Giteax.Module
@@ -129,5 +129,28 @@ defmodule Giteax.Organization.Schemas.Repo do
     |> Ecto.Changeset.put_embed(:owner, owner)
     |> Ecto.Changeset.put_embed(:permissions, permissions)
     |> Ecto.Changeset.apply_changes()
+  end
+
+  @impl Giteax.Module
+  def parse_list(nil), do: []
+  def parse_list([]), do: []
+
+  def parse_list(list) do
+    for params <- list do
+      external_tracker = ExternalTracker.parse(params["external_tracker"])
+      external_wiki = ExternalWiki.parse(params["external_wiki"])
+      internal_tracker = InternalTracker.parse(params["internal_tracker"])
+      owner = User.parse(params["owner"])
+      permissions = Permission.parse(params["permissions"])
+
+      %__MODULE__{}
+      |> Ecto.Changeset.cast(params, @fields)
+      |> Ecto.Changeset.put_embed(:external_tracker, external_tracker)
+      |> Ecto.Changeset.put_embed(:external_wiki, external_wiki)
+      |> Ecto.Changeset.put_embed(:internal_tracker, internal_tracker)
+      |> Ecto.Changeset.put_embed(:owner, owner)
+      |> Ecto.Changeset.put_embed(:permissions, permissions)
+      |> Ecto.Changeset.apply_changes()
+    end
   end
 end
